@@ -5,6 +5,7 @@ import Home from './components/Home.jsx';
 import Footer from './components/Footer.jsx';
 import News from './components/News.jsx';
 import SOSRequest from './components/SOSRequest.jsx';
+import SafeZones from './components/SafeZones.jsx';
 
 function App() {
 
@@ -30,6 +31,14 @@ function App() {
       element: (<div className="w-full">
         <Navbar />
         <SOSRequest />
+        <Footer />
+      </div>)
+    },
+    {
+      path: "/safezones",
+      element: (<div className="w-full">
+        <Navbar />
+        <SafeZones />
         <Footer />
       </div>)
     },
