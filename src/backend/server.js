@@ -2,9 +2,11 @@ import express from "express";
 import dotenv from "dotenv";
 import sosRoutes from "./routes/sosRoutes.js";
 import cors from "cors";
+import mongoDb from "./config/db.js";
+
 
 dotenv.config();
-
+mongoDb();
 
 const app = express();
 
