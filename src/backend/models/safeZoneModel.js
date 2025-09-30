@@ -10,4 +10,4 @@ const safeZoneSchema = new mongoose.Schema({
     contact: String,
 });
 
-const SafeZone = mongoose.model("SafeZone", safeZoneSchema);
+export default mongoose.model("SafeZone", safeZoneSchema);
