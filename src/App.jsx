@@ -6,10 +6,17 @@ import Footer from './components/Footer.jsx';
 import News from './components/News.jsx';
 import SOSRequest from './components/SOSRequest.jsx';
 import SafeZones from './components/SafeZones.jsx';
+import Login from './components/Login.jsx';
 
 function App() {
 
   const router = createBrowserRouter([
+    {
+      path: "/login",
+      element: (<div className="w-full">
+        <Login />
+      </div>)
+    },
     {
       path: "/",
       element: (<div className="w-full">
