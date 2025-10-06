@@ -7,6 +7,7 @@ import News from './components/News.jsx';
 import SOSRequest from './components/SOSRequest.jsx';
 import SafeZones from './components/SafeZones.jsx';
 import Login from './components/Login.jsx';
+import { Toaster } from "react-hot-toast"
 
 function App() {
 
@@ -55,6 +56,7 @@ function App() {
     <>
       <div>
         <RouterProvider router={router} />
+        <Toaster />
       </div>
     </>
   )

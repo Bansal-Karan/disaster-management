@@ -1,8 +1,12 @@
 import React, { useState } from "react";
 import { FaUser, FaLock, FaIdBadge } from "react-icons/fa";
 import Logo from "../assets/logo.png";
+import { useNavigate } from "react-router-dom"
+import toast from "react-hot-toast"
 
 export default function AuthPage() {
+
+  const navigate = useNavigate()
   const [role, setRole] = useState("user");
   const [isRegister, setIsRegister] = useState(false);
   const [form, setForm] = useState({
@@ -13,10 +17,57 @@ export default function AuthPage() {
     role: "user",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    
+
+    try {
+      if (isRegister) {
+        const res = await fetch('http://localhost:5000/api/user/register', {
+          body: JSON.stringify(form),
+          headers: {
+            "Content-Type": "application/json"
+          },
+          method: "POST"
+        })
+
+        const data = await res.json()
+
+        toast.success(data.message)
+
+        setIsRegister(false)
+      }
+      else {
+        const res = await fetch('http://localhost:5000/api/user/login', {
+          body: JSON.stringify(form),
+          headers: {
+            "Content-Type": "application/json"
+          },
+          method: "POST"
+        })
+
+        const data = await res.json()
+
+        toast.success(data.message)
+        localStorage.setItem("token", data.token)
+
+        navigate("/")
+
+      }
+    } catch (error) {
+      console.log("Error:", error);
+
+    }
+
+    finally {
+      setForm({
+        name: "",
+        username: "",
+        password: "",
+        confirmPassword: "",
+        role: "user",
+      })
+    }
+
   };
 
   return (
@@ -48,7 +99,7 @@ export default function AuthPage() {
                 type="text"
                 placeholder="Your Name"
                 className="bg-transparent outline-none flex-1"
-                onChange={setForm({ ...form, name: e.target.value })}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
               />
             </div>
           )}
@@ -60,7 +111,7 @@ export default function AuthPage() {
               type="text"
               placeholder="Your Username"
               className="bg-transparent outline-none flex-1"
-              onChange={setForm({ ...form, username: e.target.value })}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
             />
           </div>
 
@@ -71,7 +122,7 @@ export default function AuthPage() {
               type="password"
               placeholder="Password"
               className="bg-transparent outline-none flex-1"
-              onChange={setForm({ ...form, password: e.target.value })}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
             />
           </div>
 
@@ -83,7 +134,7 @@ export default function AuthPage() {
                 type="password"
                 placeholder="Confirm Password"
                 className="bg-transparent outline-none flex-1"
-                onChange={setForm({ ...form, confirmPassword: e.target.value })}
+                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
               />
             </div>
           )}
@@ -120,7 +171,7 @@ export default function AuthPage() {
               {isRegister ? "Already have an account?" : "Don't have an account?"}
               <button
                 type="button"
-                onClick={() => setIsRegister(!isRegister)} 
+                onClick={() => setIsRegister(!isRegister)}
                 className="ml-2 underline text-green-400"
               >
                 {isRegister ? "Login" : "Register"}

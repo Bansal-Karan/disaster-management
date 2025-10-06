@@ -9,4 +9,6 @@ router.get("/", async (req, res) => {
   res.json(zones);
 });
 
+
+
 export default router;
