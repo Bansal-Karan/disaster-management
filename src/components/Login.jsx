@@ -1,14 +1,14 @@
 import React, { useState } from "react";
-import { FaUser, FaLock, FaIdBadge } from "react-icons/fa";
+import { FaUser, FaLock, FaIdBadge, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner } from "react-icons/fa";
 import Logo from "../assets/logo.png";
-import { useNavigate } from "react-router-dom"
-import toast from "react-hot-toast"
+import { useNavigate, NavLink } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function AuthPage() {
-
-  const navigate = useNavigate()
-  const [role, setRole] = useState("user");
+  const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -20,166 +20,282 @@ export default function AuthPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (isRegister && form.password !== form.confirmPassword) {
+      toast.error("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+
     try {
       if (isRegister) {
-        const res = await fetch('http://localhost:5000/api/user/register', {
+        const res = await fetch("http://localhost:5000/api/user/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
-          headers: {
-            "Content-Type": "application/json"
-          },
-          method: "POST"
-        })
+        });
 
-        const data = await res.json()
+        const data = await res.json();
+        if (res.ok && data.success) {
+          toast.success(data.message || "Account registered successfully! Please log in.");
+          setIsRegister(false);
+        } else {
+          toast.error(data.message || "Registration failed. Please check your credentials.");
+        }
+      } else {
+        const res = await fetch("http://localhost:5000/api/user/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: form.username,
+            password: form.password,
+          }),
+        });
 
-        toast.success(data.message)
-
-        setIsRegister(false)
-      }
-      else {
-        const res = await fetch('http://localhost:5000/api/user/login', {
-          body: JSON.stringify(form),
-          headers: {
-            "Content-Type": "application/json"
-          },
-          method: "POST"
-        })
-
-        const data = await res.json()
-
-        toast.success(data.message)
-        localStorage.setItem("token", data.token)
-
-        navigate("/")
-
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem("token", data.token);
+          if (data.user) {
+            localStorage.setItem("user", JSON.stringify(data.user));
+          }
+          if (data.user?.role === 'admin' || data.user?.role === 'volunteer') {
+            navigate("/dashboard");
+          } else {
+            navigate("/");
+          }
+        } else {
+          toast.error(data.message || "Invalid credentials.");
+        }
       }
     } catch (error) {
-      console.log("Error:", error);
-
+      console.log("Auth error:", error);
+      toast.error("Could not connect to authentication server. Please check backend.");
+    } finally {
+      setLoading(false);
     }
-
-    finally {
-      setForm({
-        name: "",
-        username: "",
-        password: "",
-        confirmPassword: "",
-        role: "user",
-      })
-    }
-
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r">
-      <div className="grid grid-cols-2 items-center gap-20">
-        {/* Logo Section */}
-        <div>
-          <img
-            src={Logo}
-            alt="Disaster Management"
-            className="rounded-lg shadow-lg"
-          />
-        </div>
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+      
+      {/* Background radial glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
 
-        {/* Form Section */}
-        <form
-          onSubmit={handleSubmit}
-          className="bg-gray-900 p-8 rounded-2xl shadow-xl text-white w-96"
-        >
-          <h2 className="text-2xl font-bold mb-6 text-center">
-            {isRegister ? "Register Account" : "Login"}
-          </h2>
-
-          {/* Name (only show in register) */}
-          {isRegister && (
-            <div className="flex items-center bg-gray-800 px-3 py-2 rounded-lg mb-3">
-              <FaIdBadge className="text-gray-400 mr-2" />
-              <input
-                type="text"
-                placeholder="Your Name"
-                className="bg-transparent outline-none flex-1"
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-            </div>
-          )}
-
-          {/* Username */}
-          <div className="flex items-center bg-gray-800 px-3 py-2 rounded-lg mb-3">
-            <FaUser className="text-gray-400 mr-2" />
-            <input
-              type="text"
-              placeholder="Your Username"
-              className="bg-transparent outline-none flex-1"
-              onChange={(e) => setForm({ ...form, username: e.target.value })}
+      <div className="w-full max-w-4xl grid md:grid-cols-12 gap-8 items-center relative z-10">
+        
+        {/* Left Side: Brand & Mission Info (Hidden on small mobile) */}
+        <div className="hidden md:flex md:col-span-5 flex-col items-start space-y-6 text-left">
+          <NavLink to="/" className="inline-flex items-center gap-3">
+            <img
+              src={Logo}
+              alt="AapdaMitra"
+              className="w-16 h-16 object-contain rounded-2xl bg-white/10 p-2 border border-white/15 shadow-xl"
             />
-          </div>
-
-          {/* Password */}
-          <div className="flex items-center bg-gray-800 px-3 py-2 rounded-lg mb-3">
-            <FaLock className="text-gray-400 mr-2" />
-            <input
-              type="password"
-              placeholder="Password"
-              className="bg-transparent outline-none flex-1"
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-            />
-          </div>
-
-          {/* Confirm Password (only in register) */}
-          {isRegister && (
-            <div className="flex items-center bg-gray-800 px-3 py-2 rounded-lg mb-3">
-              <FaLock className="text-gray-400 mr-2" />
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                className="bg-transparent outline-none flex-1"
-                onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-              />
+            <div>
+              <span className="text-3xl font-extrabold text-white font-['Outfit']">
+                AapdaMitra
+              </span>
+              <p className="text-xs text-indigo-300 font-semibold tracking-wider uppercase">
+                Disaster Relief Network
+              </p>
             </div>
-          )}
+          </NavLink>
 
-          {/* Role Selection */}
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="w-full bg-gray-800 px-3 py-2 rounded-lg mb-4 outline-none"
-          >
-            <option value="user">User</option>
-            <option value="volunteer">Volunteer</option>
-            <option value="admin">Admin</option>
-          </select>
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-red-600 hover:bg-red-700 py-2 rounded-lg font-semibold transition"
-            onClick={handleSubmit}
-          >
-            {isRegister ? "Register" : "Login"}
-          </button>
-
-          {/* Links */}
-          <div className="flex justify-between mt-3 text-sm">
-            {!isRegister && (
-              <a href="#" className="hover:underline text-blue-400">
-                Forgot Password?
-              </a>
-            )}
-
-            <p>
-              {isRegister ? "Already have an account?" : "Don't have an account?"}
-              <button
-                type="button"
-                onClick={() => setIsRegister(!isRegister)}
-                className="ml-2 underline text-green-400"
-              >
-                {isRegister ? "Login" : "Register"}
-              </button>
+          <div className="space-y-3">
+            <h2 className="text-2xl font-bold text-white font-['Outfit'] leading-tight">
+              Rapid Humanitarian Response Network
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Sign in to manage emergency alerts, report disaster hazards, and coordinate shelter logistics with responders in your area.
             </p>
           </div>
-        </form>
+
+          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2 text-xs text-slate-300 w-full">
+            <div className="flex items-center gap-2 font-semibold text-emerald-400">
+              <FaShieldAlt /> Verified & Encrypted
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Your contact data and credentials remain securely safeguarded per disaster relief protocols.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side: Auth Form Card */}
+        <div className="md:col-span-7">
+          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-white/15 shadow-2xl space-y-6 text-left">
+            
+            {/* Tab Switcher */}
+            <div className="flex items-center bg-white/5 p-1 rounded-2xl border border-white/10">
+              <button
+                type="button"
+                onClick={() => setIsRegister(false)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
+                  !isRegister
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRegister(true)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
+                  isRegister
+                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-white font-['Outfit']">
+                {isRegister ? "Join the AapdaMitra Network" : "Welcome Back"}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                {isRegister
+                  ? "Register as a citizen, volunteer, or relief coordinator."
+                  : "Enter your username and password to continue."}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              
+              {/* Full Name (Only when registering) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    Full Name *
+                  </label>
+                  <div className="relative">
+                    <FaIdBadge className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Karan Bansal"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Username or Email */}
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  Username or Email *
+                </label>
+                <div className="relative">
+                  <FaUser className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. bansal@gmail.com or Bansal"
+                    value={form.username}
+                    onChange={(e) => setForm({ ...form, username: e.target.value })}
+                    className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Password */}
+              <div>
+                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  Password *
+                </label>
+                <div className="relative">
+                  <FaLock className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    required
+                    placeholder="Enter password"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="glass-input w-full pl-9 pr-10 py-2.5 rounded-xl text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white text-xs"
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password (Only when registering) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    Confirm Password *
+                  </label>
+                  <div className="relative">
+                    <FaLock className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="Re-enter password"
+                      value={form.confirmPassword}
+                      onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                      className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Role Selection (Only when registering) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    Account Role
+                  </label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="glass-input w-full px-3.5 py-2.5 rounded-xl text-sm outline-none bg-[#1a1e3d]"
+                  >
+                    <option value="user">Citizen / User</option>
+                    <option value="volunteer">Rescue Volunteer</option>
+                    <option value="admin">Disaster Response Coordinator (Admin)</option>
+                  </select>
+                </div>
+              )}
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-indigo-950/40 hover:scale-[1.01] transition-all disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <FaSpinner className="animate-spin text-sm" />
+                    <span>{isRegister ? "Creating Account..." : "Signing In..."}</span>
+                  </>
+                ) : (
+                  <span>{isRegister ? "Complete Registration" : "Sign In to Account"}</span>
+                )}
+              </button>
+
+            </form>
+
+            <div className="text-center pt-2">
+              <NavLink
+                to="/"
+                className="text-xs text-slate-400 hover:text-indigo-300 transition-colors"
+              >
+                ← Back to Home
+              </NavLink>
+            </div>
+
+          </div>
+        </div>
+
       </div>
+
     </div>
   );
 }

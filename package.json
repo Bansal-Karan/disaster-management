@@ -8,13 +8,13 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start": "concurrently \"npm run server\" \"npm run client\"",
     "server": "cd src/backend && nodemon server.js",
     "client": "cd src && npm run dev"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dom": "^0.0.3",
     "dotenv": "^17.2.2",

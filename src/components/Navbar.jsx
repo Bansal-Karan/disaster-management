@@ -1,53 +1,279 @@
-import React from 'react'
-import Logo from '../assets/logo.png'
-
-const links = [
-  {
-    name: 'Home',
-    path: '/',
-  },
-  {
-    name: 'News',
-    path: '/news',
-  },
-  {
-    name: 'Safe Zones',
-    path: '/safezones',
-  },
-  {
-    name: 'SOS Requests',
-    path: '/sosrequests',
-  },
-  {
-    name: 'Resources',
-    path: '/resources',
-  },
-  {
-    name: 'Dashboard',
-    path: '/dashboard',
-  },
-  {
-    name: 'login',
-    path: '/login',
-  },
-] 
+import React, { useState, useEffect } from 'react';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import Logo from '../assets/logo.png';
+import { FaBars, FaTimes, FaShieldAlt, FaExclamationTriangle, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 
 const Navbar = () => {
-  return (
-    <div className='fixed top-0 left-0 w-full sm:px-20 px-6 bg-[#3C467B] shadow-md justify-between flex  py-4 z-50'>
-      <div>
-        <img src={Logo} alt="logo" className='w-10 h-10 object-contain rounded-md' />
-      </div>
-      <div className='flex gap-8 sm:gap-12 py-2'>
-        {links.map(({ name, path }, index) => (
-          <a key={index}
-            href={path}>
-            <span>{name}</span>
-          </a>
-        ))}
-      </div>
-    </div>
-  )
-}
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('user'));
+    } catch {
+      return null;
+    }
+  });
+  const navigate = useNavigate();
+  const location = useLocation();
 
-export default Navbar
+  useEffect(() => {
+    setToken(localStorage.getItem('token'));
+    try {
+      setCurrentUser(JSON.parse(localStorage.getItem('user')));
+    } catch {
+      setCurrentUser(null);
+    }
+    setMobileMenuOpen(false);
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setToken(null);
+    setCurrentUser(null);
+    navigate('/login');
+  };
+
+  // Desktop navigation items (clean, deduplicated, and prioritized by role)
+  const navLinks = [
+    { name: 'Home', path: '/' },
+    ...(currentUser?.role === 'admin'
+      ? [{ name: 'Command Center', path: '/dashboard' }]
+      : currentUser?.role === 'volunteer'
+      ? [{ name: 'Responder Desk', path: '/dashboard' }]
+      : []),
+    { name: 'Safe Zones', path: '/safezones' },
+    { name: 'Live News', path: '/news' },
+    ...(!currentUser?.role || currentUser?.role === 'user'
+      ? [{ name: 'SOS Requests', path: '/sosrequests' }]
+      : []),
+  ];
+
+  // Full list for the mobile drawer
+  const mobileNavLinks = [
+    { name: 'Home', path: '/' },
+    { name: 'Safe Zones', path: '/safezones' },
+    { name: 'Live News', path: '/news' },
+    { name: 'SOS Requests', path: '/sosrequests' },
+    ...(currentUser?.role === 'admin'
+      ? [{ name: 'Command Center', path: '/dashboard' }]
+      : currentUser?.role === 'volunteer'
+      ? [{ name: 'Responder Desk', path: '/dashboard' }]
+      : token
+      ? [{ name: 'Citizen Dashboard', path: '/dashboard' }]
+      : []),
+  ];
+
+  return (
+    <nav className="fixed top-0 left-0 w-full z-50 bg-[#1e2344]/90 backdrop-blur-md border-b border-white/10 shadow-lg">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 gap-4">
+          
+          {/* Brand Logo */}
+          <NavLink to="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+            <div className="relative">
+              <img 
+                src={Logo} 
+                alt="AapdaMitra Logo" 
+                className="w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-xl p-1 bg-white/10 border border-white/15 shadow-md group-hover:scale-105 transition-transform duration-200" 
+              />
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-[#1e2344]"></span>
+              </span>
+            </div>
+            <div className="leading-tight">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-white font-['Outfit'] group-hover:text-indigo-300 transition-colors">
+                  AapdaMitra
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                  Live
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] font-medium text-slate-400 tracking-wide hidden sm:block">
+                Disaster Relief & Safety
+              </p>
+            </div>
+          </NavLink>
+
+          {/* Desktop Navigation Links */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2 shrink-0">
+            {navLinks.map(({ name, path, badge, role }) => (
+              <NavLink
+                key={path}
+                to={path}
+                className={({ isActive }) =>
+                  `flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 rounded-xl text-xs xl:text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                    isActive
+                      ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-400/30 shadow-inner'
+                      : 'text-slate-300 hover:text-white hover:bg-white/5'
+                  }`
+                }
+              >
+                <span>{name}</span>
+                {badge && (
+                  <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded border ${
+                    role === 'admin'
+                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                      : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  }`}>
+                    {badge}
+                  </span>
+                )}
+              </NavLink>
+            ))}
+          </div>
+
+          {/* Right Action Area */}
+          <div className="hidden lg:flex items-center gap-2 xl:gap-3 shrink-0">
+            {/* Quick Emergency SOS CTA */}
+            <NavLink
+              to="/sosrequests"
+              className="flex items-center gap-1.5 px-3 py-1.5 xl:px-4 xl:py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white text-xs xl:text-sm font-bold shadow-lg shadow-rose-900/30 hover:shadow-rose-900/50 hover:scale-[1.02] transition-all animate-emergency-pulse whitespace-nowrap shrink-0"
+            >
+              <FaExclamationTriangle className="text-amber-200 text-xs" />
+              <span>SOS Alert</span>
+            </NavLink>
+
+            {/* Auth Button & User Profile */}
+            {token ? (
+              <div className="flex items-center gap-1.5 xl:gap-2">
+                <NavLink
+                  to="/dashboard"
+                  className="flex items-center gap-2 px-2.5 py-1.5 xl:px-3.5 xl:py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-indigo-400/30 text-xs transition-all whitespace-nowrap shrink-0"
+                  title="Open Command Dashboard"
+                >
+                  <FaUserCircle className="text-indigo-400 text-sm xl:text-base shrink-0" />
+                  <span className="font-semibold text-white max-w-[80px] xl:max-w-[110px] truncate">
+                    {currentUser?.name || currentUser?.username || 'User'}
+                  </span>
+                  {currentUser?.role && (
+                    <span className={`text-[9px] uppercase font-extrabold px-1.5 py-0.5 rounded border ${
+                      currentUser.role === 'admin'
+                        ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                        : currentUser.role === 'volunteer'
+                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                        : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+                    }`}>
+                      {currentUser.role}
+                    </span>
+                  )}
+                </NavLink>
+
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1.5 px-2.5 py-1.5 xl:px-3 xl:py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-rose-300 hover:bg-rose-500/10 border border-white/10 hover:border-rose-500/30 transition-all whitespace-nowrap shrink-0"
+                  title="Log out"
+                >
+                  <FaSignOutAlt className="text-slate-400 text-xs" />
+                  <span className="hidden xl:inline">Logout</span>
+                </button>
+              </div>
+            ) : (
+              <NavLink
+                to="/login"
+                className="flex items-center gap-2 px-3.5 py-1.5 xl:px-4 xl:py-2 rounded-xl text-xs xl:text-sm font-medium text-slate-200 bg-white/5 hover:bg-white/10 border border-white/15 transition-all whitespace-nowrap shrink-0"
+              >
+                <FaUserCircle className="text-slate-400" />
+                <span>Sign In</span>
+              </NavLink>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <div className="flex lg:hidden items-center gap-2">
+            <NavLink
+              to="/sosrequests"
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-md animate-emergency-pulse text-xs font-bold flex items-center gap-1"
+            >
+              <FaExclamationTriangle className="text-amber-200 text-xs" />
+              <span>SOS</span>
+            </NavLink>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      {/* Mobile Dropdown Drawer */}
+      {mobileMenuOpen && (
+        <div className="lg:hidden bg-[#1a1e3b] border-b border-white/10 px-4 pt-3 pb-6 space-y-2 shadow-2xl animate-in slide-in-from-top duration-200">
+          {mobileNavLinks.map(({ name, path, badge, role }) => (
+            <NavLink
+              key={path}
+              to={path}
+              onClick={() => setMobileMenuOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center justify-between px-4 py-2.5 rounded-xl text-base font-semibold ${
+                  isActive
+                    ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-400/30'
+                    : 'text-slate-300 hover:bg-white/5'
+                }`
+              }
+            >
+              <span>{name}</span>
+              {badge && (
+                <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border ${
+                  role === 'admin'
+                    ? 'bg-rose-500/20 text-rose-300 border-rose-500/30'
+                    : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                }`}>
+                  {badge}
+                </span>
+              )}
+            </NavLink>
+          ))}
+
+          <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
+            {token ? (
+              <>
+                <div className="flex items-center justify-between px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-xs">
+                  <div className="flex items-center gap-2">
+                    <FaUserCircle className="text-indigo-400 text-base" />
+                    <span className="font-semibold text-white">
+                      {currentUser?.name || currentUser?.username}
+                    </span>
+                  </div>
+                  {currentUser?.role && (
+                    <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                      {currentUser.role}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-rose-300 bg-rose-500/10 border border-rose-500/20"
+                >
+                  <FaSignOutAlt />
+                  <span>Logout</span>
+                </button>
+              </>
+            ) : (
+              <NavLink
+                to="/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500"
+              >
+                <FaUserCircle />
+                <span>Sign In / Register</span>
+              </NavLink>
+            )}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
+};
+
+export default Navbar;
