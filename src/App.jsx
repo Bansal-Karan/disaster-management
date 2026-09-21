@@ -93,29 +93,28 @@ function App() {
   ]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#171a2e] text-slate-100">
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
       <RouterProvider router={router} />
       <Toaster
         position="top-right"
         toastOptions={{
-          className: 'glass-panel text-white font-medium',
+          className: 'glass-panel text-slate-900 font-medium',
           style: {
-            background: 'rgba(30, 36, 70, 0.95)',
-            color: '#f8fafc',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+            background: '#ffffff',
+            color: '#0f172a',
+            border: '1px solid #e2e8f0',
+            borderRadius: '14px',
+            boxShadow: '0 10px 30px rgba(15, 23, 42, 0.08)',
           },
           success: {
             iconTheme: {
-              primary: '#10b981',
+              primary: '#059669',
               secondary: '#ffffff',
             },
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
+              primary: '#e11d48',
               secondary: '#ffffff',
             },
           },

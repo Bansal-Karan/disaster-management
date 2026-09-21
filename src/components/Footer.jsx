@@ -5,15 +5,15 @@ import { FaPhoneAlt, FaShieldAlt, FaMapMarkerAlt, FaAmbulance, FaFireExtinguishe
 const emergencyNumbers = [
   { label: 'National Emergency', number: '112', icon: FaShieldAlt, color: 'text-amber-400' },
   { label: 'Ambulance & Medical', number: '108', icon: FaAmbulance, color: 'text-rose-400' },
-  { label: 'Disaster Helpline', number: '1078', icon: FaShieldAlt, color: 'text-blue-400' },
+  { label: 'Disaster Helpline', number: '1078', icon: FaShieldAlt, color: 'text-sky-400' },
   { label: 'Fire & Rescue', number: '101', icon: FaFireExtinguisher, color: 'text-orange-400' },
 ];
 
 const Footer = () => {
   return (
-    <footer className="mt-auto bg-[#171a2e] border-t border-white/10 text-slate-300">
+    <footer className="mt-auto bg-[#0a1128] border-t border-slate-200 text-slate-300 text-left">
       {/* Emergency Hotlines Strip */}
-      <div className="bg-[#1e2448]/90 border-b border-white/10 py-4 px-4 sm:px-6 lg:px-8">
+      <div className="bg-[#0f172a] border-b border-white/10 py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <span className="flex h-3 w-3 relative">
@@ -21,7 +21,7 @@ const Footer = () => {
               <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
             </span>
             <span className="text-xs uppercase font-bold tracking-wider text-rose-400">
-              24/7 Emergency Hotlines (Toll-Free)
+              24/7 Emergency Hotlines (Toll-Free in India)
             </span>
           </div>
 
@@ -30,7 +30,7 @@ const Footer = () => {
               <a
                 key={number}
                 href={`tel:${number}`}
-                className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all text-xs group"
+                className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 hover:border-white/20 transition-all text-xs group"
               >
                 <Icon className={`${color} group-hover:scale-110 transition-transform`} />
                 <div>
@@ -53,8 +53,8 @@ const Footer = () => {
               <span className="text-xl font-extrabold text-white font-['Outfit'] tracking-tight">
                 AapdaMitra Platform
               </span>
-              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                Operational
+              <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold">
+                Active & Operational
               </span>
             </div>
             <p className="text-xs text-slate-400 max-w-md leading-relaxed">
@@ -73,17 +73,17 @@ const Footer = () => {
             </h4>
             <ul className="space-y-2 text-xs">
               <li>
-                <NavLink to="/" className="text-slate-400 hover:text-indigo-300 transition-colors">
+                <NavLink to="/" className="text-slate-400 hover:text-white transition-colors">
                   Home Overview
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/safezones" className="text-slate-400 hover:text-indigo-300 transition-colors">
+                <NavLink to="/safezones" className="text-slate-400 hover:text-white transition-colors">
                   Safe Zones & Shelters
                 </NavLink>
               </li>
               <li>
-                <NavLink to="/news" className="text-slate-400 hover:text-indigo-300 transition-colors">
+                <NavLink to="/news" className="text-slate-400 hover:text-white transition-colors">
                   Live Disaster Bulletins
                 </NavLink>
               </li>

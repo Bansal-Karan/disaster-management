@@ -16,11 +16,11 @@ import {
 } from "react-icons/fa";
 
 const emergencyCategories = [
-  { label: "Medical Emergency", icon: "🚑", color: "border-rose-500/40 bg-rose-500/10 text-rose-300" },
-  { label: "Water / Flood Trapped", icon: "🌊", color: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300" },
-  { label: "Fire Outbreak", icon: "🔥", color: "border-orange-500/40 bg-orange-500/10 text-orange-300" },
-  { label: "Food & Potable Water", icon: "🍞", color: "border-amber-500/40 bg-amber-500/10 text-amber-300" },
-  { label: "Building / Landslide", icon: "🏚️", color: "border-purple-500/40 bg-purple-500/10 text-purple-300" },
+  { label: "Medical Emergency", icon: "🚑", color: "border-rose-300 bg-rose-50 text-rose-900" },
+  { label: "Water / Flood Trapped", icon: "🌊", color: "border-sky-300 bg-sky-50 text-sky-900" },
+  { label: "Fire Outbreak", icon: "🔥", color: "border-orange-300 bg-orange-50 text-orange-900" },
+  { label: "Food & Potable Water", icon: "🍞", color: "border-amber-300 bg-amber-50 text-amber-900" },
+  { label: "Building / Landslide", icon: "🏚️", color: "border-purple-300 bg-purple-50 text-purple-900" },
 ];
 
 export default function SOSRequest() {
@@ -96,7 +96,6 @@ export default function SOSRequest() {
           timestamp: new Date().toLocaleTimeString(),
         });
       } else {
-        // In case mail server isn't configured, fallback gracefully so user is comforted
         toast.success("Emergency request recorded in dispatch log!");
         setSubmittedDispatch({
           id: "DISPATCH-" + Math.floor(100000 + Math.random() * 900000),
@@ -105,7 +104,6 @@ export default function SOSRequest() {
         });
       }
     } catch (err) {
-      // Local fallback in case backend is offline
       toast.success("Emergency distress signal broadcasted locally!");
       setSubmittedDispatch({
         id: "EMERGENCY-" + Math.floor(100000 + Math.random() * 900000),
@@ -121,10 +119,10 @@ export default function SOSRequest() {
     <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
       
       {/* Top Advisory */}
-      <div className="mb-8 p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 flex items-center justify-between text-rose-200 text-xs sm:text-sm">
-        <div className="flex items-center gap-3 font-semibold">
-          <FaExclamationTriangle className="text-rose-400 text-lg shrink-0 animate-bounce" />
-          <span>If you are in immediate life-threatening danger, also dial 112 or 108 directly on your mobile device.</span>
+      <div className="mb-8 p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-900 text-xs sm:text-sm shadow-xs">
+        <div className="flex items-center gap-3 font-semibold text-left">
+          <FaExclamationTriangle className="text-rose-600 text-lg shrink-0 animate-bounce" />
+          <span>If you are in immediate life-threatening danger, dial 112 or 108 directly on your mobile device.</span>
         </div>
       </div>
 
@@ -132,15 +130,15 @@ export default function SOSRequest() {
         
         {/* Left Form: Emergency Console */}
         <div className="lg:col-span-8">
-          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-white/15 shadow-2xl relative overflow-hidden">
+          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-md relative overflow-hidden bg-white">
             
-            <div className="flex items-center justify-between pb-6 mb-6 border-b border-white/10">
-              <div>
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-bold mb-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+            <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
+              <div className="text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-bold mb-2">
+                  <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
                   Rapid SOS Dispatch Console
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white font-['Outfit']">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-['Outfit']">
                   Request Emergency Assistance
                 </h1>
               </div>
@@ -148,34 +146,34 @@ export default function SOSRequest() {
 
             {submittedDispatch ? (
               <div className="space-y-6 text-center py-8 animate-in fade-in zoom-in duration-300">
-                <div className="w-20 h-20 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center text-4xl shadow-xl shadow-emerald-950/40">
+                <div className="w-20 h-20 mx-auto rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-4xl shadow-md shadow-emerald-100">
                   <FaCheckCircle />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-2xl font-bold text-white font-['Outfit']">
+                  <h3 className="text-2xl font-bold text-slate-900 font-['Outfit']">
                     Emergency Alert Logged & Dispatched
                   </h3>
-                  <p className="text-sm text-slate-300 max-w-md mx-auto">
+                  <p className="text-sm text-slate-600 max-w-md mx-auto">
                     Your distress beacon has been routed to nearby rescue coordinators. Keep your mobile phone accessible.
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 max-w-md mx-auto text-left space-y-2 text-xs">
-                  <div className="flex justify-between border-b border-white/5 pb-1.5">
-                    <span className="text-slate-400">Dispatch Reference:</span>
-                    <span className="font-mono font-bold text-indigo-300">{submittedDispatch.id}</span>
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 max-w-md mx-auto text-left space-y-2 text-xs">
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-500">Dispatch Reference:</span>
+                    <span className="font-mono font-bold text-indigo-700">{submittedDispatch.id}</span>
                   </div>
-                  <div className="flex justify-between border-b border-white/5 pb-1.5">
-                    <span className="text-slate-400">Category / Urgency:</span>
-                    <span className="font-semibold text-rose-300">{submittedDispatch.category} ({submittedDispatch.urgency})</span>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-500">Category / Urgency:</span>
+                    <span className="font-semibold text-rose-700">{submittedDispatch.category} ({submittedDispatch.urgency})</span>
                   </div>
-                  <div className="flex justify-between border-b border-white/5 pb-1.5">
-                    <span className="text-slate-400">Location:</span>
-                    <span className="font-semibold text-white truncate max-w-[200px]">{submittedDispatch.location}</span>
+                  <div className="flex justify-between border-b border-slate-200/60 pb-1.5">
+                    <span className="text-slate-500">Location:</span>
+                    <span className="font-semibold text-slate-900 truncate max-w-[200px]">{submittedDispatch.location}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Dispatched At:</span>
-                    <span className="text-slate-300">{submittedDispatch.timestamp}</span>
+                    <span className="text-slate-500">Dispatched At:</span>
+                    <span className="text-slate-700">{submittedDispatch.timestamp}</span>
                   </div>
                 </div>
 
@@ -192,7 +190,7 @@ export default function SOSRequest() {
                       message: "",
                     });
                   }}
-                  className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white text-sm font-semibold transition-all"
+                  className="px-6 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-sm font-semibold transition-all border border-slate-200"
                 >
                   Send Another Distress Signal
                 </button>
@@ -202,7 +200,7 @@ export default function SOSRequest() {
                 
                 {/* 1. Emergency Category Selector */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2.5">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2.5">
                     1. Select Emergency Type
                   </label>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
@@ -213,8 +211,8 @@ export default function SOSRequest() {
                         onClick={() => setForm({ ...form, category: label })}
                         className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs font-semibold transition-all text-left ${
                           form.category === label
-                            ? `${color} ring-2 ring-indigo-400 shadow-md scale-[1.02]`
-                            : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                            ? `${color} ring-2 ring-indigo-500 shadow-xs scale-[1.02]`
+                            : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                         }`}
                       >
                         <span className="text-base">{icon}</span>
@@ -226,27 +224,27 @@ export default function SOSRequest() {
 
                 {/* 2. Urgency Selector */}
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
                     2. Severity Level
                   </label>
                   <div className="grid grid-cols-3 gap-2.5">
                     {[
-                      { level: "CRITICAL", desc: "Life Threatening", color: "bg-rose-600 border-rose-400" },
-                      { level: "HIGH", desc: "Urgent Danger", color: "bg-amber-600 border-amber-400" },
-                      { level: "MODERATE", desc: "Supplies Needed", color: "bg-indigo-600 border-indigo-400" },
-                    ].map(({ level, desc, color }) => (
+                      { level: "CRITICAL", desc: "Life Threatening", activeStyle: "bg-rose-600 text-white border-rose-600 shadow-sm" },
+                      { level: "HIGH", desc: "Urgent Danger", activeStyle: "bg-amber-600 text-white border-amber-600 shadow-sm" },
+                      { level: "MODERATE", desc: "Supplies Needed", activeStyle: "bg-indigo-600 text-white border-indigo-600 shadow-sm" },
+                    ].map(({ level, desc, activeStyle }) => (
                       <button
                         type="button"
                         key={level}
                         onClick={() => setForm({ ...form, urgency: level })}
                         className={`p-2.5 rounded-xl border text-xs font-semibold transition-all text-center ${
                           form.urgency === level
-                            ? `${color} text-white shadow-lg shadow-black/40 scale-[1.02]`
-                            : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10"
+                            ? `${activeStyle} scale-[1.02]`
+                            : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
                         }`}
                       >
                         <div className="font-bold">{level}</div>
-                        <div className="text-[10px] text-white/70">{desc}</div>
+                        <div className={`text-[10px] ${form.urgency === level ? "text-white/80" : "text-slate-500"}`}>{desc}</div>
                       </button>
                     ))}
                   </div>
@@ -255,7 +253,7 @@ export default function SOSRequest() {
                 {/* 3. Contact Details */}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Your Full Name *
                     </label>
                     <div className="relative">
@@ -273,7 +271,7 @@ export default function SOSRequest() {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Active Phone Number *
                     </label>
                     <div className="relative">
@@ -293,7 +291,7 @@ export default function SOSRequest() {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                       Email Address (Optional)
                     </label>
                     <div className="relative">
@@ -312,28 +310,28 @@ export default function SOSRequest() {
                   {/* Location with One-Click GPS */}
                   <div>
                     <div className="flex items-center justify-between mb-1.5">
-                      <label className="text-xs font-medium text-slate-300">
+                      <label className="text-xs font-semibold text-slate-700">
                         Incident Location / Landmark *
                       </label>
                       <button
                         type="button"
                         onClick={handleDetectLocation}
                         disabled={locating}
-                        className="text-[11px] font-bold text-indigo-300 hover:text-white flex items-center gap-1 bg-indigo-500/20 px-2 py-0.5 rounded-md border border-indigo-500/30 transition-all"
+                        className="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200 transition-all shadow-xs"
                       >
                         {locating ? (
                           <>
-                            <FaSpinner className="animate-spin" /> Fetching GPS...
+                            <FaSpinner className="animate-spin text-indigo-600" /> Fetching GPS...
                           </>
                         ) : (
                           <>
-                            <FaCrosshairs className="text-emerald-400" /> Auto-Detect GPS
+                            <FaCrosshairs className="text-emerald-600" /> Auto-Detect GPS
                           </>
                         )}
                       </button>
                     </div>
                     <div className="relative">
-                      <FaMapMarkerAlt className="absolute left-3.5 top-3.5 text-rose-400 text-xs" />
+                      <FaMapMarkerAlt className="absolute left-3.5 top-3.5 text-rose-500 text-xs" />
                       <input
                         type="text"
                         name="location"
@@ -349,7 +347,7 @@ export default function SOSRequest() {
 
                 {/* 4. Message / Emergency Details */}
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Emergency Description (Number of trapped persons, injuries, immediate needs) *
                   </label>
                   <textarea
@@ -367,7 +365,7 @@ export default function SOSRequest() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-extrabold text-base shadow-xl shadow-rose-950/60 transition-all animate-emergency-pulse disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-extrabold text-base shadow-lg shadow-rose-200 transition-all animate-emergency-pulse disabled:opacity-50"
                 >
                   {submitting ? (
                     <>
@@ -376,7 +374,7 @@ export default function SOSRequest() {
                     </>
                   ) : (
                     <>
-                      <FaExclamationTriangle className="text-amber-300 text-lg" />
+                      <FaExclamationTriangle className="text-amber-200 text-lg" />
                       <span>DISPATCH IMMEDIATE SOS BEACON</span>
                     </>
                   )}
@@ -392,11 +390,11 @@ export default function SOSRequest() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* Quick Dial Card */}
-          <div className="glass-panel p-6 rounded-3xl border border-white/15 space-y-4">
-            <h3 className="font-bold text-white text-base font-['Outfit'] flex items-center gap-2">
-              <FaPhoneAlt className="text-rose-400" /> Direct Emergency Lines
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 bg-white shadow-xs text-left">
+            <h3 className="font-bold text-slate-900 text-base font-['Outfit'] flex items-center gap-2">
+              <FaPhoneAlt className="text-rose-600" /> Direct Emergency Lines
             </h3>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               If data networks fail or response is delayed, call these free toll lines directly from any phone:
             </p>
 
@@ -410,20 +408,20 @@ export default function SOSRequest() {
                 <a
                   key={number}
                   href={`tel:${number}`}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all group shadow-xs"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30">
+                    <div className="p-2 rounded-xl bg-rose-100 text-rose-700 border border-rose-200">
                       <Icon className="text-sm" />
                     </div>
                     <div className="text-left">
-                      <div className="text-xs font-bold text-white group-hover:text-rose-300 transition-colors">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
                         {title}
                       </div>
-                      <div className="text-[10px] text-slate-400">{desc}</div>
+                      <div className="text-[10px] text-slate-500">{desc}</div>
                     </div>
                   </div>
-                  <span className="text-sm font-extrabold text-white font-mono px-2.5 py-1 rounded-lg bg-white/10 group-hover:bg-rose-600 transition-colors">
+                  <span className="text-sm font-extrabold text-slate-900 font-mono px-2.5 py-1 rounded-lg bg-white border border-slate-200 group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-colors">
                     {number}
                   </span>
                 </a>
@@ -432,11 +430,11 @@ export default function SOSRequest() {
           </div>
 
           {/* Quick Survival Tips */}
-          <div className="glass-card p-6 rounded-3xl border border-white/10 space-y-3 text-left">
-            <h4 className="font-bold text-white text-sm font-['Outfit']">
-              distress beacon advisory
+          <div className="glass-card p-6 rounded-3xl border border-slate-200 space-y-3 text-left bg-white shadow-xs">
+            <h4 className="font-bold text-slate-900 text-xs uppercase tracking-wider font-['Outfit']">
+              Distress Beacon Advisory
             </h4>
-            <ul className="text-xs text-slate-300 space-y-2 list-disc list-inside">
+            <ul className="text-xs text-slate-600 space-y-2 list-disc list-inside leading-relaxed">
               <li>Keep your mobile on low power mode to conserve battery.</li>
               <li>Stay together with your group in high, visible spots.</li>
               <li>Use a flashlight or bright cloth to signal aerial responders.</li>

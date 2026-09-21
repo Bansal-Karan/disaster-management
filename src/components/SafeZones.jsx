@@ -27,16 +27,16 @@ function MapController({ selectedCoords }) {
 
 // Custom DivIcons for Leaflet (solves the Vite/bundler 404 missing marker image bug)
 const getMarkerIcon = (type) => {
-  let bg = "#10b981"; // Emerald for Shelter
+  let bg = "#059669"; // Emerald for Shelter
   let icon = "🏠";
   if (type === "Hospital") {
-    bg = "#ef4444";
+    bg = "#e11d48";
     icon = "🏥";
   } else if (type === "Relief Camp") {
-    bg = "#f59e0b";
+    bg = "#d97706";
     icon = "⛺";
   } else if (type === "Food Center") {
-    bg = "#8b5cf6";
+    bg = "#7c3aed";
     icon = "🍲";
   }
 
@@ -53,7 +53,7 @@ const getMarkerIcon = (type) => {
         justify-content: center;
         font-size: 16px;
         border: 2px solid white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 12px rgba(15,23,42,0.25);
         cursor: pointer;
         transition: transform 0.2s;
       ">
@@ -118,14 +118,26 @@ const defaultSafeZones = [
   },
   {
     _id: "sz-5",
-    name: "Government Multi-Specialty Hospital (GMSH)",
+    name: "GMCH Government Medical College & Hospital",
     type: "Hospital",
-    address: "Sector 16, Chandigarh",
+    address: "Chandi Path, Sector 32, Chandigarh",
+    capacity: 400,
+    occupied: 280,
+    contact: "+91 172 266 5253",
+    latitude: 30.7132,
+    longitude: 76.7845,
+    status: "Operational",
+  },
+  {
+    _id: "sz-6",
+    name: "Sector 42 Indoor Sports Evacuation Center",
+    type: "Shelter",
+    address: "Sports Complex, Sector 42, Chandigarh",
     capacity: 300,
-    occupied: 195,
-    contact: "+91 172 275 2200",
-    latitude: 30.7495,
-    longitude: 76.7865,
+    occupied: 45,
+    contact: "+91 172 260 5510",
+    latitude: 30.7289,
+    longitude: 76.7456,
     status: "Operational",
   },
 ];
@@ -133,27 +145,17 @@ const defaultSafeZones = [
 const categories = ["All", "Shelter", "Hospital", "Relief Camp", "Food Center"];
 
 export default function SafeZones() {
-  const [zones, setZones] = useState([]);
-  const [selectedCoords, setSelectedCoords] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [zones, setZones] = useState(defaultSafeZones);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCoords, setSelectedCoords] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    fetch("http://localhost:5000/api/safeZones", {
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized or server error");
-        return res.json();
-      })
+    fetch("http://localhost:5000/api/safezones")
+      .then((res) => res.json())
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          // Merge API data with default safe zones for a rich map
-          setZones([...data, ...defaultSafeZones]);
+        if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+          setZones(data.data);
         } else {
           setZones(defaultSafeZones);
         }
@@ -171,20 +173,33 @@ export default function SafeZones() {
     return matchesCategory && matchesSearch;
   });
 
+  const getTypeBadge = (type) => {
+    switch (type) {
+      case "Hospital":
+        return <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-rose-50 text-rose-800 border border-rose-200">Hospital</span>;
+      case "Relief Camp":
+        return <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">Relief Camp</span>;
+      case "Food Center":
+        return <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-50 text-purple-800 border border-purple-200">Food Center</span>;
+      default:
+        return <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">Shelter</span>;
+    }
+  };
+
   return (
     <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 text-left">
       
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold mb-2">
             <FaShieldAlt /> Evacuation & Relief Centers
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-['Outfit'] tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
             Safe Zones & Verified Shelters
           </h1>
-          <p className="text-sm text-slate-400 mt-1">
-            Real-time map and capacity dashboard for flood shelters, trauma hospitals, and food stations.
+          <p className="text-sm text-slate-600 mt-1">
+            Real-time map and capacity dashboard for flood shelters, trauma hospitals, and relief stations.
           </p>
         </div>
 
@@ -209,8 +224,8 @@ export default function SafeZones() {
             onClick={() => setSelectedCategory(cat)}
             className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
               selectedCategory === cat
-                ? "bg-emerald-600 text-white shadow-lg shadow-emerald-950/40 border border-emerald-400/40 scale-105"
-                : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10"
+                ? "bg-emerald-600 text-white shadow-xs border border-emerald-600 scale-105"
+                : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-xs"
             }`}
           >
             {cat}
@@ -223,8 +238,8 @@ export default function SafeZones() {
         
         {/* Interactive Leaflet Map */}
         <div className="lg:col-span-7">
-          <div className="glass-panel p-3 rounded-3xl border border-white/15 overflow-hidden shadow-2xl">
-            <div className="rounded-2xl overflow-hidden relative z-0 h-[480px]">
+          <div className="glass-panel p-3 rounded-3xl border border-slate-200 overflow-hidden shadow-md bg-white">
+            <div className="rounded-2xl overflow-hidden relative z-0 h-[480px] border border-slate-100">
               <MapContainer
                 center={[30.7333, 76.7794]}
                 zoom={12}
@@ -268,14 +283,14 @@ export default function SafeZones() {
               </MapContainer>
             </div>
 
-            <div className="p-3 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-3 flex items-center justify-between text-xs text-slate-500">
               <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Shelter
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500 ml-2"></span> Hospital
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ml-2"></span> Relief Camp
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500 ml-2"></span> Food Center
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Shelter
+                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 ml-2"></span> Hospital
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-600 ml-2"></span> Relief Camp
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-600 ml-2"></span> Food Center
               </span>
-              <span className="font-medium">{filteredZones.length} centers available</span>
+              <span className="font-semibold text-slate-700">{filteredZones.length} centers available</span>
             </div>
           </div>
         </div>
@@ -283,14 +298,14 @@ export default function SafeZones() {
         {/* Scrollable List of Safe Zone Cards */}
         <div className="lg:col-span-5 space-y-4 max-h-[560px] overflow-y-auto pr-1">
           {filteredZones.length === 0 ? (
-            <div className="glass-card p-8 rounded-2xl text-center space-y-3">
-              <p className="text-slate-400 text-sm">No safe zones matched your search query.</p>
+            <div className="bg-white p-8 rounded-2xl text-center space-y-3 border border-slate-200 shadow-xs">
+              <p className="text-slate-500 text-sm">No safe zones matched your search query.</p>
               <button
                 onClick={() => {
                   setSearchQuery("");
                   setSelectedCategory("All");
                 }}
-                className="px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-semibold"
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold"
               >
                 Reset Filters
               </button>
@@ -306,42 +321,40 @@ export default function SafeZones() {
                 <div
                   key={zone._id}
                   onClick={() => setSelectedCoords([zone.latitude, zone.longitude])}
-                  className="glass-card p-5 rounded-2xl border border-white/10 cursor-pointer group space-y-3 relative overflow-hidden"
+                  className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-emerald-300 shadow-xs hover:shadow-md cursor-pointer group space-y-3 relative overflow-hidden transition-all"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        {zone.type}
-                      </span>
-                      <h3 className="text-base font-bold text-white mt-1 group-hover:text-emerald-300 transition-colors font-['Outfit']">
+                      {getTypeBadge(zone.type)}
+                      <h3 className="text-base font-bold text-slate-900 mt-1.5 group-hover:text-emerald-700 transition-colors font-['Outfit']">
                         {zone.name}
                       </h3>
                     </div>
                     <button
                       title="Center on Map"
-                      className="p-2 rounded-xl bg-white/5 group-hover:bg-emerald-500 group-hover:text-white text-slate-400 transition-all"
+                      className="p-2 rounded-xl bg-slate-100 group-hover:bg-emerald-600 group-hover:text-white text-slate-600 transition-all"
                     >
                       <FaDirections className="text-xs" />
                     </button>
                   </div>
 
-                  <p className="text-xs text-slate-300 flex items-start gap-1.5">
-                    <FaMapMarkerAlt className="text-rose-400 mt-0.5 shrink-0" />
+                  <p className="text-xs text-slate-600 flex items-start gap-1.5">
+                    <FaMapMarkerAlt className="text-rose-500 mt-0.5 shrink-0" />
                     <span>{zone.address}</span>
                   </p>
 
                   {/* Bed Capacity Progress Bar */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] text-slate-300">
-                      <span className="flex items-center gap-1">
-                        <FaBed className="text-indigo-300" />
+                    <div className="flex justify-between text-[11px] text-slate-600">
+                      <span className="flex items-center gap-1 font-medium">
+                        <FaBed className="text-indigo-600" />
                         <span>Occupancy</span>
                       </span>
-                      <span className="font-semibold">
+                      <span className="font-semibold text-slate-800">
                         {zone.capacity} beds ({100 - capacityPercent}% available)
                       </span>
                     </div>
-                    <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                       <div
                         className={`h-full rounded-full ${
                           capacityPercent > 80
@@ -356,16 +369,16 @@ export default function SafeZones() {
                   </div>
 
                   {/* Contact Footer */}
-                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
                     <a
                       href={`tel:${zone.contact}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-1.5 text-indigo-300 hover:text-white font-medium"
+                      className="flex items-center gap-1.5 text-indigo-600 hover:text-indigo-800 font-semibold"
                     >
                       <FaPhoneAlt className="text-[10px]" />
                       <span>{zone.contact}</span>
                     </a>
-                    <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
                       <FaCheckCircle className="text-[10px]" /> Open 24/7
                     </span>
                   </div>

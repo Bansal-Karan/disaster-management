@@ -19,55 +19,55 @@ import {
 } from 'react-icons/fa';
 
 const stats = [
-  { value: '45+', label: 'Verified Safe Zones', detail: 'Real-time capacity tracking' },
-  { value: '< 6 Min', label: 'Average Response Time', detail: 'Emergency dispatch coordination' },
-  { value: '1,450+', label: 'Volunteers on Standby', detail: 'Certified medical & rescue teams' },
-  { value: '24 / 7', label: 'Active Command Center', detail: 'Direct link to state helplines' },
+  { value: '45+', label: 'Verified Safe Zones', detail: 'Real-time shelter capacity' },
+  { value: '< 6 Min', label: 'Average Response Time', detail: 'Rapid rescue coordination' },
+  { value: '1,450+', label: 'Volunteers on Standby', detail: 'Certified medical & NDRF responders' },
+  { value: '24 / 7', label: 'Active Command Center', detail: 'Direct link to state relief desks' },
 ];
 
 const preparednessGuides = {
   floods: {
     title: 'Flood Protocol',
     icon: FaWater,
-    color: 'text-cyan-400',
+    color: 'text-sky-600',
     steps: [
-      'Move immediately to higher ground; avoid walking or driving through moving water.',
-      'Disconnect electrical appliances to prevent electrocution.',
-      'Drink only bottled or boiled water to avoid waterborne contaminants.',
-      'Listen to official radio and SMS alerts; do not return home until instructed.',
+      'Move immediately to higher ground; avoid walking or driving through moving floodwater.',
+      'Disconnect electrical appliances to eliminate risks of electrocution.',
+      'Drink only boiled or bottled water to avoid waterborne contaminants.',
+      'Listen to official IMD and SMS warnings; do not return until authorities clear the area.',
     ],
   },
   earthquake: {
     title: 'Earthquake Protocol',
     icon: FaShieldAlt,
-    color: 'text-amber-400',
+    color: 'text-amber-600',
     steps: [
       'DROP to the floor, COVER under a sturdy desk or table, and HOLD ON.',
-      'Stay away from glass windows, heavy lighting, and tall bookshelves.',
-      'If outdoors, move away from buildings, streetlights, and utility wires.',
-      'After shocks cease, check for gas leaks and evacuate using stairs—not elevators.',
+      'Stay away from glass windows, heavy lighting, and tall furniture.',
+      'If outdoors, move into an open area away from buildings, streetlights, and wires.',
+      'After shocks cease, check for gas leaks and evacuate using stairways—not elevators.',
     ],
   },
   cyclone: {
     title: 'Cyclone Protocol',
     icon: FaWind,
-    color: 'text-indigo-400',
+    color: 'text-indigo-600',
     steps: [
-      'Secure windows and doors; shutter or board large glass panes.',
-      'Store adequate clean water, dry foods, battery packs, and emergency first aid.',
-      'Remain indoors in the strongest part of the house until the eye of the storm passes.',
-      'Keep emergency radio tuned to Indian Meteorological Department (IMD) bulletins.',
+      'Secure windows and doors; shutter or tape large glass panes.',
+      'Store adequate clean water, dry provisions, emergency battery packs, and first aid.',
+      'Remain indoors in the strongest interior room until the storm eye fully passes.',
+      'Keep your radio tuned to Indian Meteorological Department (IMD) updates.',
     ],
   },
   fire: {
     title: 'Fire Outbreak Protocol',
     icon: FaFire,
-    color: 'text-rose-400',
+    color: 'text-rose-600',
     steps: [
-      'Crawl low under heavy smoke where air is cleaner and cooler.',
-      'Feel doorknobs with the back of your hand before opening; if hot, seek another exit.',
+      'Crawl low under smoke where air is cooler and cleaner.',
+      'Feel doorknobs with the back of your hand before opening; if warm, seek another route.',
       'Use stairwells immediately; never use elevators during a structural fire.',
-      'Call emergency dispatch (101 / 112) as soon as you reach a safe muster point.',
+      'Call emergency dispatch (101 / 112) as soon as you reach an outdoor assembly point.',
     ],
   },
 };
@@ -89,38 +89,37 @@ const Home = () => {
       });
   }, []);
 
-  const getTimeRemaining = (createdAt) => {
-    if (!createdAt) return '24h Active';
-    const created = new Date(createdAt).getTime();
-    const expiresAt = created + 24 * 60 * 60 * 1000;
-    const remainingMs = expiresAt - Date.now();
-    if (remainingMs <= 0) return 'Expired';
-    const hours = Math.floor(remainingMs / (1000 * 60 * 60));
-    const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
-    return `${hours}h ${minutes}m left`;
+  const getTimeAgo = (createdAt) => {
+    if (!createdAt) return 'Recently issued';
+    const diffMs = Date.now() - new Date(createdAt).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    return `${diffHours}h ago`;
   };
 
   return (
-    <div className="flex flex-col w-full pt-20">
+    <div className="flex flex-col w-full pt-20 text-left">
       
-      {/* Active 24-Hour Admin Crisis Broadcast Ribbon */}
+      {/* Live Public Safety Emergency Directive Banner */}
       {broadcasts.length > 0 && (
-        <div className="w-full bg-gradient-to-r from-rose-900/90 via-[#221028]/95 to-rose-950/90 border-b border-rose-500/40 px-4 py-3 text-left shadow-xl backdrop-blur-md animate-in slide-in-from-top duration-300">
+        <div className="w-full bg-rose-50 border-b border-rose-200 px-4 py-3 shadow-xs">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
             <div className="flex items-center gap-3 flex-1">
               <span className="flex h-3 w-3 relative shrink-0">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-500"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-rose-600"></span>
               </span>
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded bg-rose-500/30 text-rose-200 border border-rose-500/50 tracking-wider">
+                <span className="text-[10px] uppercase font-extrabold px-2 py-0.5 rounded bg-rose-600 text-white tracking-wider">
                   {broadcasts[0].severity} DIRECTIVE
                 </span>
-                <span className="text-xs sm:text-sm font-bold text-white">
+                <span className="text-xs sm:text-sm font-bold text-slate-900">
                   {broadcasts[0].title}
                 </span>
-                <span className="text-[11px] text-rose-300/80 font-mono hidden sm:inline">
-                  • ⏳ {getTimeRemaining(broadcasts[0].createdAt)} (24h Window)
+                <span className="text-[11px] text-slate-500 font-medium hidden sm:inline">
+                  • Issued {getTimeAgo(broadcasts[0].createdAt)}
                 </span>
               </div>
             </div>
@@ -128,14 +127,14 @@ const Home = () => {
             <div className="flex items-center gap-2 shrink-0 w-full md:w-auto justify-end">
               <NavLink
                 to="/news"
-                className="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition-all flex items-center gap-1.5"
+                className="px-3 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-800 text-xs font-semibold border border-slate-200 transition-all flex items-center gap-1.5 shadow-xs"
               >
                 <span>View Directives ({broadcasts.length})</span>
                 <FaArrowRight className="text-[10px]" />
               </NavLink>
               <NavLink
                 to="/safezones"
-                className="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-md transition-all"
+                className="px-3 py-1 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold shadow-xs transition-all"
               >
                 Find Shelters
               </NavLink>
@@ -146,28 +145,28 @@ const Home = () => {
 
       {/* 1. Hero Section */}
       <section className="relative overflow-hidden py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
-        {/* Glow ambient backdrops */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/15 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute top-1/3 right-10 w-72 h-72 bg-rose-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        {/* Serene ambient backdrops */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-sky-400/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-1/3 right-10 w-72 h-72 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-12 items-center">
           
           {/* Left Hero Column */}
-          <div className="lg:col-span-7 space-y-6 text-left">
+          <div className="lg:col-span-7 space-y-6">
             
             {/* Live Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs font-semibold tracking-wide">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold tracking-wide">
               <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600"></span>
               </span>
-              24/7 National Crisis & Emergency Dispatch
+              24/7 National Crisis & Emergency Dispatch Network
             </div>
 
             {/* Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight font-['Outfit']">
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight tracking-tight font-['Outfit']">
               Rapid Response When <br />
-              <span className="bg-gradient-to-r from-rose-400 via-indigo-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-rose-600 via-indigo-600 to-sky-600 bg-clip-text text-transparent">
                 Every Second Counts
               </span>
             </h1>
@@ -184,11 +183,11 @@ const Home = () => {
                 wrapper="span"
                 speed={50}
                 repeat={Infinity}
-                className="text-lg sm:text-xl font-medium text-slate-300"
+                className="text-lg sm:text-xl font-semibold text-slate-700"
               />
             </div>
 
-            <p className="text-sm sm:text-base text-slate-400 max-w-xl leading-relaxed">
+            <p className="text-sm sm:text-base text-slate-600 max-w-xl leading-relaxed">
               Connect immediately with nearby relief shelters, send verified GPS-tagged emergency requests to responders, and receive real-time crisis bulletins.
             </p>
 
@@ -196,29 +195,29 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
               <NavLink
                 to="/sosrequests"
-                className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-base shadow-xl shadow-rose-950/40 hover:shadow-rose-900/60 hover:scale-[1.02] transition-all animate-emergency-pulse"
+                className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-base shadow-lg shadow-rose-200 hover:scale-[1.02] transition-all animate-emergency-pulse"
               >
-                <FaExclamationTriangle className="text-amber-300" />
+                <FaExclamationTriangle className="text-amber-200" />
                 <span>Send Emergency SOS</span>
               </NavLink>
 
               <NavLink
                 to="/safezones"
-                className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 text-white font-semibold text-base backdrop-blur-md hover:scale-[1.02] transition-all"
+                className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-base shadow-xs hover:scale-[1.02] transition-all"
               >
-                <FaMapMarkedAlt className="text-emerald-400" />
+                <FaMapMarkedAlt className="text-emerald-600" />
                 <span>Find Safe Shelters</span>
               </NavLink>
             </div>
 
             {/* Quick Helpline Strip */}
-            <div className="pt-4 flex items-center gap-4 text-xs text-slate-400">
-              <span className="font-semibold text-slate-300">Quick Helplines:</span>
-              <a href="tel:112" className="hover:text-rose-300 font-bold underline">112 (National)</a>
+            <div className="pt-4 flex items-center gap-4 text-xs text-slate-500">
+              <span className="font-semibold text-slate-700">Quick Helplines:</span>
+              <a href="tel:112" className="text-rose-600 hover:text-rose-700 font-bold underline">112 (National)</a>
               <span>•</span>
-              <a href="tel:108" className="hover:text-rose-300 font-bold underline">108 (Ambulance)</a>
+              <a href="tel:108" className="text-rose-600 hover:text-rose-700 font-bold underline">108 (Ambulance)</a>
               <span>•</span>
-              <a href="tel:1078" className="hover:text-rose-300 font-bold underline">1078 (Disaster)</a>
+              <a href="tel:1078" className="text-rose-600 hover:text-rose-700 font-bold underline">1078 (Disaster)</a>
             </div>
 
           </div>
@@ -226,24 +225,24 @@ const Home = () => {
           {/* Right Hero Column: Interactive Card Display */}
           <div className="lg:col-span-5 flex justify-center">
             <div className="relative w-full max-w-md">
-              <div className="glass-panel p-6 sm:p-8 rounded-3xl relative z-10 border border-white/15 space-y-6">
+              <div className="glass-panel p-6 sm:p-8 rounded-3xl relative z-10 border border-slate-200 shadow-md space-y-6 bg-white">
                 
-                <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                   <div className="flex items-center gap-3">
                     <img 
                       src={Logo} 
                       alt="AapdaMitra Shield" 
-                      className="w-14 h-14 object-contain rounded-2xl bg-white/10 p-2 border border-white/20 shadow-inner" 
+                      className="w-14 h-14 object-contain rounded-2xl bg-indigo-50 p-2 border border-indigo-100 shadow-xs" 
                     />
                     <div>
-                      <h3 className="font-bold text-white text-lg font-['Outfit']">AapdaMitra Command</h3>
-                      <p className="text-xs text-emerald-400 font-medium flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      <h3 className="font-bold text-slate-900 text-lg font-['Outfit']">AapdaMitra Command</h3>
+                      <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         Emergency Network Active
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold">
+                  <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
                     v2.0 Live
                   </span>
                 </div>
@@ -252,61 +251,61 @@ const Home = () => {
                 <div className="space-y-3">
                   <NavLink
                     to="/safezones"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200/80 transition-all group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                      <div className="p-2.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200">
                         <FaHospital />
                       </div>
                       <div className="text-left">
-                        <div className="text-sm font-semibold text-white group-hover:text-emerald-300 transition-colors">
+                        <div className="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
                           Safe Zones Map
                         </div>
-                        <div className="text-xs text-slate-400">Locate open shelters & medical units</div>
+                        <div className="text-xs text-slate-500">Locate open shelters & medical units</div>
                       </div>
                     </div>
-                    <FaArrowRight className="text-slate-400 group-hover:text-emerald-300 group-hover:translate-x-1 transition-all text-xs" />
+                    <FaArrowRight className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all text-xs" />
                   </NavLink>
 
                   <NavLink
                     to="/news"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all group"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/80 transition-all group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      <div className="p-2.5 rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200">
                         <FaShieldAlt />
                       </div>
                       <div className="text-left">
-                        <div className="text-sm font-semibold text-white group-hover:text-indigo-300 transition-colors">
+                        <div className="text-sm font-semibold text-slate-900 group-hover:text-indigo-700 transition-colors">
                           Disaster Bulletins
                         </div>
-                        <div className="text-xs text-slate-400">Live verified updates & warnings</div>
+                        <div className="text-xs text-slate-500">Live verified updates & warnings</div>
                       </div>
                     </div>
-                    <FaArrowRight className="text-slate-400 group-hover:text-indigo-300 group-hover:translate-x-1 transition-all text-xs" />
+                    <FaArrowRight className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all text-xs" />
                   </NavLink>
 
                   <NavLink
                     to="/sosrequests"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/30 transition-all group"
+                    className="flex items-center justify-between p-3.5 rounded-xl bg-rose-50 hover:bg-rose-100/70 border border-rose-200 transition-all group"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-rose-500/30 text-rose-300 border border-rose-500/40">
+                      <div className="p-2.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">
                         <FaExclamationTriangle />
                       </div>
                       <div className="text-left">
-                        <div className="text-sm font-semibold text-rose-200 group-hover:text-rose-100 transition-colors">
+                        <div className="text-sm font-semibold text-rose-900 group-hover:text-rose-950 transition-colors">
                           Dispatch SOS Alert
                         </div>
-                        <div className="text-xs text-rose-300/70">Broadcast emergency coordinates</div>
+                        <div className="text-xs text-rose-700/80">Broadcast emergency coordinates</div>
                       </div>
                     </div>
-                    <FaArrowRight className="text-rose-300 group-hover:translate-x-1 transition-all text-xs" />
+                    <FaArrowRight className="text-rose-500 group-hover:translate-x-1 transition-all text-xs" />
                   </NavLink>
                 </div>
 
                 <div className="pt-2 text-center">
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] text-slate-500">
                     Trusted by community volunteers and civil defense organizations.
                   </span>
                 </div>
@@ -319,17 +318,17 @@ const Home = () => {
       </section>
 
       {/* 2. Live Metrics Counter Strip */}
-      <section className="py-10 px-4 sm:px-6 lg:px-8 border-y border-white/10 bg-[#1b203d]/70 backdrop-blur-md">
+      <section className="py-10 px-4 sm:px-6 lg:px-8 border-y border-slate-200 bg-white shadow-xs">
         <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
           {stats.map(({ value, label, detail }) => (
-            <div key={label} className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-1">
-              <div className="text-3xl sm:text-4xl font-extrabold text-white font-['Outfit'] tracking-tight">
+            <div key={label} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
                 {value}
               </div>
-              <div className="text-xs sm:text-sm font-semibold text-indigo-300">
+              <div className="text-xs sm:text-sm font-bold text-indigo-700">
                 {label}
               </div>
-              <div className="text-[11px] text-slate-400 hidden sm:block">
+              <div className="text-[11px] text-slate-500 hidden sm:block">
                 {detail}
               </div>
             </div>
@@ -340,13 +339,13 @@ const Home = () => {
       {/* 3. Disaster Preparedness & Survival Protocols */}
       <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-semibold">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold">
             <FaHandsHelping /> Disaster Readiness Guide
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white font-['Outfit']">
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-['Outfit']">
             Emergency Preparedness Protocols
           </h2>
-          <p className="text-sm text-slate-400 max-w-2xl mx-auto">
+          <p className="text-sm text-slate-600 max-w-2xl mx-auto">
             Review essential life-saving measures before, during, and after severe weather and geological hazards.
           </p>
         </div>
@@ -362,8 +361,8 @@ const Home = () => {
                 onClick={() => setActiveGuide(key)}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   isSelected
-                    ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-900/40 border border-indigo-400/40 scale-105'
-                    : 'glass-card text-slate-300 hover:text-white'
+                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-600 scale-105'
+                    : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs'
                 }`}
               >
                 <Icon className={isSelected ? 'text-white' : data.color} />
@@ -374,18 +373,18 @@ const Home = () => {
         </div>
 
         {/* Active Protocol Checklist Card */}
-        <div className="glass-panel p-6 sm:p-10 rounded-3xl max-w-4xl mx-auto border border-white/10 text-left">
-          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
-            <span className="text-2xl font-bold text-white font-['Outfit']">
+        <div className="glass-panel p-6 sm:p-10 rounded-3xl max-w-4xl mx-auto border border-slate-200 text-left bg-white shadow-md">
+          <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+            <span className="text-2xl font-bold text-slate-900 font-['Outfit']">
               {preparednessGuides[activeGuide].title} Action Checklist
             </span>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
             {preparednessGuides[activeGuide].steps.map((step, idx) => (
-              <div key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-white/5 border border-white/5">
-                <FaCheckCircle className="text-emerald-400 shrink-0 mt-1 text-sm" />
-                <span className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+              <div key={idx} className="flex items-start gap-3 p-4 rounded-xl bg-slate-50 border border-slate-200/70">
+                <FaCheckCircle className="text-emerald-600 shrink-0 mt-1 text-sm" />
+                <span className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
                   {step}
                 </span>
               </div>

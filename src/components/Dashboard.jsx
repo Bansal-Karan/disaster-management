@@ -50,12 +50,22 @@ export default function Dashboard() {
   const [broadcasts, setBroadcasts] = useState([]);
   const [newBroadcast, setNewBroadcast] = useState({ title: "", severity: "WARNING" });
 
+  const getTimeAgo = (createdAt) => {
+    if (!createdAt) return "Recently issued";
+    const diffMs = Date.now() - new Date(createdAt).getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    return `${diffHours}h ago`;
+  };
+
   const getTimeRemaining = (createdAt) => {
-    if (!createdAt) return "24h Active";
+    if (!createdAt) return "Active";
     const created = new Date(createdAt).getTime();
     const expiresAt = created + 24 * 60 * 60 * 1000;
     const remainingMs = expiresAt - Date.now();
-    if (remainingMs <= 0) return "Expired (Purging...)";
+    if (remainingMs <= 0) return "Archived";
     const hours = Math.floor(remainingMs / (1000 * 60 * 60));
     const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m left`;
@@ -341,7 +351,7 @@ export default function Dashboard() {
 
       const json = await res.json();
       if (res.ok && json.success) {
-        toast.success("Emergency bulletin broadcasted across network! (Active for 24 hours)");
+        toast.success("Emergency bulletin broadcasted across network successfully!");
         setBroadcasts((prev) => [json.data, ...prev]);
         setNewBroadcast({ title: "", severity: "WARNING" });
       } else {
@@ -352,7 +362,7 @@ export default function Dashboard() {
         };
         setBroadcasts((prev) => [created, ...prev]);
         setNewBroadcast({ title: "", severity: "WARNING" });
-        toast.success("Emergency bulletin broadcasted! (Valid for 24h)");
+        toast.success("Emergency bulletin broadcasted successfully!");
       }
     } catch {
       const created = {
@@ -403,22 +413,22 @@ export default function Dashboard() {
   if (!token) {
     return (
       <div className="min-h-screen pt-32 pb-16 px-4 flex items-center justify-center">
-        <div className="glass-panel p-8 sm:p-12 rounded-3xl max-w-md w-full text-center space-y-6 border border-white/15 shadow-2xl">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-rose-500/20 text-rose-300 border border-rose-500/30 flex items-center justify-center text-3xl">
+        <div className="glass-panel p-8 sm:p-12 rounded-3xl max-w-md w-full text-center space-y-6 border border-slate-200 shadow-xl bg-white">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-rose-50 text-rose-600 border border-rose-200 flex items-center justify-center text-3xl">
             <FaLock />
           </div>
           <div className="space-y-2">
-            <h2 className="text-2xl font-bold text-white font-['Outfit']">
+            <h2 className="text-2xl font-bold text-slate-900 font-['Outfit']">
               Restricted Command Center
             </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               The Incident Command Dashboard is restricted to registered <strong>Disaster Response Coordinators (Admins)</strong> and <strong>Field Responders (Volunteers)</strong>.
             </p>
           </div>
           <div className="pt-2">
             <NavLink
               to="/login"
-              className="w-full inline-block py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-950/50 transition-all"
+              className="w-full inline-block py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 transition-all"
             >
               Sign In to Command Portal
             </NavLink>
@@ -432,25 +442,25 @@ export default function Dashboard() {
   if (!isAuthorized) {
     return (
       <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto space-y-8 text-left animate-in fade-in duration-200">
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/15 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-white">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-indigo-400"></span>
-              <span className="text-xs uppercase font-extrabold px-3 py-1 rounded-full border bg-indigo-500/20 text-indigo-300 border-indigo-500/30">
+              <span className="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              <span className="text-xs uppercase font-extrabold px-3 py-1 rounded-full border bg-indigo-50 text-indigo-700 border-indigo-200">
                 Citizen Safety Portal
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-['Outfit'] tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
               Disaster Response Hub
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300">
-              Welcome, <span className="font-bold text-white">{currentUser?.name || currentUser?.username}</span>. You are currently logged in with a Standard Citizen account.
+            <p className="text-xs sm:text-sm text-slate-600">
+              Welcome, <span className="font-bold text-slate-900">{currentUser?.name || currentUser?.username}</span>. You are currently logged in with a Standard Citizen account.
             </p>
           </div>
 
           <button
             onClick={handleUpgradeToVolunteer}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 transition-all hover:scale-105"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-100 transition-all hover:scale-105"
           >
             <FaHandsHelping className="text-base" />
             <span>Enroll as Field Volunteer</span>
@@ -458,17 +468,17 @@ export default function Dashboard() {
         </div>
 
         {/* Capability Comparison Matrix */}
-        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/15 shadow-xl space-y-4">
-          <h2 className="text-xl font-bold text-white font-['Outfit'] flex items-center gap-2">
-            <FaShieldAlt className="text-indigo-400" /> AapdaMitra Role Capabilities
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md space-y-4 bg-white">
+          <h2 className="text-xl font-bold text-slate-900 font-['Outfit'] flex items-center gap-2">
+            <FaShieldAlt className="text-indigo-600" /> AapdaMitra Role Capabilities
           </h2>
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-slate-600">
             Field rescue missions and emergency dispatch are coordinated by active Responders and Disaster Coordinators.
           </p>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left text-slate-300">
-              <thead className="bg-white/5 uppercase text-[10px] text-slate-400 font-bold border-b border-white/10">
+            <table className="w-full text-xs text-left text-slate-700">
+              <thead className="bg-slate-100 uppercase text-[10px] text-slate-600 font-bold border-b border-slate-200">
                 <tr>
                   <th className="py-3 px-4">Feature</th>
                   <th className="py-3 px-4 text-center">Citizen (You)</th>
@@ -476,36 +486,36 @@ export default function Dashboard() {
                   <th className="py-3 px-4 text-center">Admin Coordinator</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/5">
+              <tbody className="divide-y divide-slate-100">
                 <tr>
-                  <td className="py-3 px-4 font-semibold text-white">Send SOS Alert & View Safe Zones</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Active</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Active</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Active</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900">Send SOS Alert & View Safe Zones</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Active</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Active</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Active</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-4 font-semibold text-white">Emergency Incident Feed</td>
-                  <td className="py-3 px-4 text-center text-slate-500">❌ Restricted</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ View Local SOS</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Full Network SOS</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900">Emergency Incident Feed</td>
+                  <td className="py-3 px-4 text-center text-slate-400">❌ Restricted</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ View Local SOS</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Full Network SOS</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-4 font-semibold text-white">Accept & Resolve Rescue Missions</td>
-                  <td className="py-3 px-4 text-center text-slate-500">❌ Restricted</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Claim & Call Victims</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Assign & Triage</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900">Accept & Resolve Rescue Missions</td>
+                  <td className="py-3 px-4 text-center text-slate-400">❌ Restricted</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Claim & Call Victims</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Assign & Triage</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-4 font-semibold text-white">Add & Manage Safe Shelters</td>
-                  <td className="py-3 px-4 text-center text-slate-500">❌ Restricted</td>
-                  <td className="py-3 px-4 text-center text-slate-500">❌ Restricted</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Manage & Add</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900">Add & Manage Safe Shelters</td>
+                  <td className="py-3 px-4 text-center text-slate-400">❌ Restricted</td>
+                  <td className="py-3 px-4 text-center text-slate-400">❌ Restricted</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Manage & Add</td>
                 </tr>
                 <tr>
-                  <td className="py-3 px-4 font-semibold text-white">Post Emergency Broadcast Bulletins</td>
-                  <td className="py-3 px-4 text-center text-slate-500">❌ Restricted</td>
-                  <td className="py-3 px-4 text-center text-slate-500">❌ Restricted</td>
-                  <td className="py-3 px-4 text-center text-emerald-400 font-bold">✅ Publish Alerts</td>
+                  <td className="py-3 px-4 font-semibold text-slate-900">Post Emergency Broadcast Bulletins</td>
+                  <td className="py-3 px-4 text-center text-slate-400">❌ Restricted</td>
+                  <td className="py-3 px-4 text-center text-slate-400">❌ Restricted</td>
+                  <td className="py-3 px-4 text-center text-emerald-600 font-bold">✅ Publish Alerts</td>
                 </tr>
               </tbody>
             </table>
@@ -516,39 +526,39 @@ export default function Dashboard() {
         <div className="grid sm:grid-cols-3 gap-4">
           <NavLink
             to="/sosrequests"
-            className="glass-card p-5 rounded-2xl border border-rose-500/30 hover:border-rose-500/60 bg-rose-500/5 hover:bg-rose-500/10 space-y-2 group transition-all"
+            className="p-5 rounded-2xl border border-rose-200 hover:border-rose-300 bg-rose-50/70 hover:bg-rose-100/70 space-y-2 group transition-all shadow-xs"
           >
-            <div className="flex items-center justify-between text-rose-400">
-              <span className="font-bold text-sm text-white font-['Outfit']">Dispatch SOS Alert</span>
+            <div className="flex items-center justify-between text-rose-600">
+              <span className="font-bold text-sm text-slate-900 font-['Outfit']">Dispatch SOS Alert</span>
               <FaExclamationTriangle />
             </div>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-600">
               Broadcast high-priority emergency distress signal with live GPS coordinates.
             </p>
           </NavLink>
 
           <NavLink
             to="/safezones"
-            className="glass-card p-5 rounded-2xl border border-emerald-500/30 hover:border-emerald-500/60 bg-emerald-500/5 hover:bg-emerald-500/10 space-y-2 group transition-all"
+            className="p-5 rounded-2xl border border-emerald-200 hover:border-emerald-300 bg-emerald-50/70 hover:bg-emerald-100/70 space-y-2 group transition-all shadow-xs"
           >
-            <div className="flex items-center justify-between text-emerald-400">
-              <span className="font-bold text-sm text-white font-['Outfit']">Locate Safe Zones</span>
+            <div className="flex items-center justify-between text-emerald-600">
+              <span className="font-bold text-sm text-slate-900 font-['Outfit']">Locate Safe Zones</span>
               <FaHospital />
             </div>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-600">
               Explore interactive map with capacity tracking for shelters, food hubs, and clinics.
             </p>
           </NavLink>
 
           <NavLink
             to="/news"
-            className="glass-card p-5 rounded-2xl border border-indigo-500/30 hover:border-indigo-500/60 bg-indigo-500/5 hover:bg-indigo-500/10 space-y-2 group transition-all"
+            className="p-5 rounded-2xl border border-indigo-200 hover:border-indigo-300 bg-indigo-50/70 hover:bg-indigo-100/70 space-y-2 group transition-all shadow-xs"
           >
-            <div className="flex items-center justify-between text-indigo-400">
-              <span className="font-bold text-sm text-white font-['Outfit']">Emergency Bulletins</span>
+            <div className="flex items-center justify-between text-indigo-600">
+              <span className="font-bold text-sm text-slate-900 font-['Outfit']">Emergency Bulletins</span>
               <FaBullhorn />
             </div>
-            <p className="text-xs text-slate-300">
+            <p className="text-xs text-slate-600">
               Read real-time crisis announcements and evacuation directives.
             </p>
           </NavLink>
@@ -561,41 +571,41 @@ export default function Dashboard() {
     <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 text-left">
       
       {/* 1. Header Banner & Identity */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-white/15 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-white">
         <div className="space-y-2">
           <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
             <span className={`text-xs uppercase font-extrabold px-3 py-1 rounded-full border ${
               isAdmin
-                ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                ? "bg-rose-50 text-rose-700 border-rose-200"
                 : isVolunteer
-                ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-                : "bg-indigo-500/20 text-indigo-300 border-indigo-500/30"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                : "bg-indigo-50 text-indigo-700 border-indigo-200"
             }`}>
               {isAdmin ? "Disaster Response Coordinator (Admin)" : "Emergency Field Responder (Volunteer)"}
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-['Outfit'] tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
             {isAdmin ? "Admin Control Center" : "Volunteer Task Portal"}
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-300">
-            Welcome, <span className="font-bold text-white">{currentUser?.name || currentUser?.username}</span>. Live coordination for disaster beacons, safe shelters, and volunteer field missions.
+          <p className="text-xs sm:text-sm text-slate-600">
+            Welcome, <span className="font-bold text-slate-900">{currentUser?.name || currentUser?.username}</span>. Live coordination for disaster beacons, safe shelters, and volunteer field missions.
           </p>
         </div>
 
         {/* Action Button & Role Preview for Admins */}
         <div className="flex flex-wrap items-center gap-3">
           {currentUser?.role === "admin" && (
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-white/10 border border-white/15 text-xs">
-              <span className="text-[10px] uppercase font-bold text-slate-300 px-2">Preview Role:</span>
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
+              <span className="text-[10px] uppercase font-bold text-slate-600 px-2">Preview Role:</span>
               <button
                 onClick={() => setActiveRoleOverride("admin")}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                   isAdmin
-                    ? "bg-rose-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-rose-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
                 title="View as Admin Coordinator"
               >
@@ -605,8 +615,8 @@ export default function Dashboard() {
                 onClick={() => setActiveRoleOverride("volunteer")}
                 className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                   isVolunteer
-                    ? "bg-emerald-600 text-white shadow-md"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-emerald-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
                 title="View as Volunteer Responder"
               >
@@ -618,7 +628,7 @@ export default function Dashboard() {
           {isAdmin && (
             <button
               onClick={() => setShowAddZoneModal(true)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 text-white font-bold text-xs shadow-lg shadow-emerald-950/40 transition-all hover:scale-105"
+              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-100 transition-all hover:scale-105"
             >
               <FaPlus />
               <span>Add Safe Shelter</span>
@@ -629,53 +639,53 @@ export default function Dashboard() {
 
       {/* 2. Top Analytics Metrics Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-1">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Pending Incidents</span>
-            <FaExclamationTriangle className="text-rose-400" />
+            <FaExclamationTriangle className="text-rose-600" />
           </div>
-          <div className="text-3xl font-extrabold text-white font-['Outfit']">
+          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {incidents.filter((i) => i.status === "Pending").length}
           </div>
-          <div className="text-[11px] text-rose-300 font-semibold">Immediate response required</div>
+          <div className="text-[11px] text-rose-700 font-semibold">Immediate response required</div>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-1">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Missions In Progress</span>
-            <FaHandsHelping className="text-amber-400" />
+            <FaHandsHelping className="text-amber-600" />
           </div>
-          <div className="text-3xl font-extrabold text-white font-['Outfit']">
+          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {incidents.filter((i) => i.status === "In Progress").length}
           </div>
-          <div className="text-[11px] text-amber-300 font-semibold">Responders actively deployed</div>
+          <div className="text-[11px] text-amber-700 font-semibold">Responders actively deployed</div>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-1">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Resolved Rescues</span>
-            <FaCheckCircle className="text-emerald-400" />
+            <FaCheckCircle className="text-emerald-600" />
           </div>
-          <div className="text-3xl font-extrabold text-white font-['Outfit']">
+          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {incidents.filter((i) => i.status === "Resolved").length}
           </div>
-          <div className="text-[11px] text-emerald-300 font-semibold">Victims relocated to safety</div>
+          <div className="text-[11px] text-emerald-700 font-semibold">Victims relocated to safety</div>
         </div>
 
-        <div className="glass-card p-5 rounded-2xl border border-white/10 space-y-1">
-          <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-slate-500">
             <span>Operational Shelters</span>
-            <FaHospital className="text-indigo-400" />
+            <FaHospital className="text-indigo-600" />
           </div>
-          <div className="text-3xl font-extrabold text-white font-['Outfit']">
+          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {safeZones.length || 5}
           </div>
-          <div className="text-[11px] text-indigo-300 font-semibold">Live GPS tracked facilities</div>
+          <div className="text-[11px] text-indigo-700 font-semibold">Live GPS tracked facilities</div>
         </div>
       </div>
 
       {/* 3. Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-white/10 pb-4">
+      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
         {[
           { id: "incidents", label: "🚨 Emergency Incident Feed", count: incidents.length },
           { id: "shelters", label: "🏥 Safe Shelters Registry", count: safeZones.length || 5 },
@@ -687,13 +697,15 @@ export default function Dashboard() {
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === id
-                ? "bg-indigo-600 text-white shadow-lg shadow-indigo-950/50 border border-indigo-400/40 scale-105"
-                : "bg-white/5 text-slate-300 hover:bg-white/10 border border-white/10"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-600 scale-105"
+                : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-xs"
             }`}
           >
             <span>{label}</span>
             {count !== null && (
-              <span className="px-2 py-0.5 rounded-full text-[10px] bg-white/20 text-white font-mono">
+              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
+                activeTab === id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
+              }`}>
                 {count}
               </span>
             )}
@@ -706,10 +718,10 @@ export default function Dashboard() {
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white font-['Outfit']">
+              <h2 className="text-2xl font-bold text-slate-900 font-['Outfit']">
                 Live SOS Distress Calls
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600">
                 {isVolunteer
                   ? "Field Responders: Claim unassigned beacons and mark missions as en route."
                   : "Command Coordinators: Oversee dispatch status and volunteer assignments."}
@@ -724,8 +736,8 @@ export default function Dashboard() {
                   onClick={() => setIncidentFilter(status)}
                   className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
                     incidentFilter === status
-                      ? "bg-white/20 text-white border border-white/30"
-                      : "bg-white/5 text-slate-400 hover:text-white"
+                      ? "bg-indigo-600 text-white shadow-xs"
+                      : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200"
                   }`}
                 >
                   {status}
@@ -735,15 +747,15 @@ export default function Dashboard() {
           </div>
 
           {loadingIncidents ? (
-            <div className="p-12 text-center text-slate-400 space-y-2">
-              <FaSpinner className="animate-spin text-2xl mx-auto text-indigo-400" />
-              <p className="text-xs">Loading live distress calls from MongoDB...</p>
+            <div className="p-12 text-center text-slate-500 space-y-2">
+              <FaSpinner className="animate-spin text-2xl mx-auto text-indigo-600" />
+              <p className="text-xs">Loading live distress calls from database...</p>
             </div>
           ) : filteredIncidents.length === 0 ? (
-            <div className="glass-card p-12 text-center rounded-2xl space-y-2">
-              <FaCheckCircle className="text-emerald-400 text-3xl mx-auto" />
-              <h3 className="text-lg font-bold text-white font-['Outfit']">No Active Distress Calls</h3>
-              <p className="text-xs text-slate-400">All registered emergency calls for this category have been addressed.</p>
+            <div className="bg-white p-12 text-center rounded-2xl space-y-2 border border-slate-200 shadow-xs">
+              <FaCheckCircle className="text-emerald-600 text-3xl mx-auto" />
+              <h3 className="text-lg font-bold text-slate-900 font-['Outfit']">No Active Distress Calls</h3>
+              <p className="text-xs text-slate-500">All registered emergency calls for this category have been addressed.</p>
             </div>
           ) : (
             <div className="grid gap-4">
@@ -755,12 +767,12 @@ export default function Dashboard() {
                 return (
                   <div
                     key={incident._id}
-                    className={`glass-panel p-6 rounded-2xl border transition-all ${
+                    className={`p-6 rounded-2xl border transition-all bg-white shadow-xs ${
                       isPending
-                        ? "border-rose-500/40 bg-rose-500/5"
+                        ? "border-l-4 border-l-rose-600 border-rose-200 bg-rose-50/20"
                         : isInProgress
-                        ? "border-amber-500/40 bg-amber-500/5"
-                        : "border-emerald-500/30 bg-emerald-500/5"
+                        ? "border-l-4 border-l-amber-500 border-amber-200 bg-amber-50/20"
+                        : "border-l-4 border-l-emerald-600 border-emerald-200 bg-emerald-50/20"
                     }`}
                   >
                     <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -769,48 +781,48 @@ export default function Dashboard() {
                       <div className="space-y-2 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
                           <span
-                            className={`text-[10px] uppercase font-bold px-2.5 py-0.5 rounded-full border ${
+                            className={`text-[10px] uppercase font-extrabold px-2.5 py-0.5 rounded-full border ${
                               isPending
-                                ? "bg-rose-500/20 text-rose-300 border-rose-500/40 animate-pulse"
+                                ? "bg-rose-100 text-rose-800 border-rose-300 animate-pulse"
                                 : isInProgress
-                                ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                                : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                                ? "bg-amber-100 text-amber-800 border-amber-300"
+                                : "bg-emerald-100 text-emerald-800 border-emerald-300"
                             }`}
                           >
                             ● {incident.status}
                           </span>
 
-                          <span className="text-xs text-slate-400 flex items-center gap-1">
+                          <span className="text-xs text-slate-500 flex items-center gap-1">
                             <FaClock className="text-[10px]" />
                             {new Date(incident.createdAt).toLocaleTimeString()}
                           </span>
 
                           {incident.assignedTo && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-md bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                            <span className="text-[11px] px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1 font-semibold">
                               <FaUserCheck className="text-[10px]" /> Assigned: {incident.assignedTo}
                             </span>
                           )}
                         </div>
 
                         <div className="flex items-center gap-3">
-                          <h3 className="text-lg font-bold text-white font-['Outfit']">
+                          <h3 className="text-lg font-bold text-slate-900 font-['Outfit']">
                             {incident.name}
                           </h3>
                           <a
                             href={`tel:${incident.phone}`}
-                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-indigo-300 hover:text-white text-xs font-semibold transition-colors"
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-colors border border-slate-200"
                           >
                             <FaPhoneAlt className="text-[10px]" />
                             <span>{incident.phone}</span>
                           </a>
                         </div>
 
-                        <p className="text-xs font-semibold text-rose-300 flex items-center gap-1.5">
+                        <p className="text-xs font-semibold text-rose-700 flex items-center gap-1.5">
                           <FaMapMarkerAlt className="shrink-0" />
                           <span>{incident.location}</span>
                         </p>
 
-                        <div className="p-3 rounded-xl bg-black/20 border border-white/5 text-xs text-slate-200 leading-relaxed">
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
                           {incident.message}
                         </div>
                       </div>
@@ -820,7 +832,7 @@ export default function Dashboard() {
                         {isPending && (
                           <button
                             onClick={() => handleUpdateStatus(incident._id, "In Progress")}
-                            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-md transition-all"
+                            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition-all"
                           >
                             <FaHandsHelping />
                             <span>Claim Mission (En Route)</span>
@@ -830,7 +842,7 @@ export default function Dashboard() {
                         {isInProgress && (
                           <button
                             onClick={() => handleUpdateStatus(incident._id, "Resolved")}
-                            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md transition-all"
+                            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all"
                           >
                             <FaCheckCircle />
                             <span>Mark Mission Resolved</span>
@@ -840,7 +852,7 @@ export default function Dashboard() {
                         {isResolved && (
                           <button
                             onClick={() => handleUpdateStatus(incident._id, "Pending")}
-                            className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-xs transition-all"
+                            className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition-all border border-slate-200 font-semibold"
                           >
                             Re-Open Incident
                           </button>
@@ -849,7 +861,7 @@ export default function Dashboard() {
                         {isAdmin && (
                           <button
                             onClick={() => handleDeleteIncident(incident._id)}
-                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs transition-all"
+                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs transition-all font-semibold"
                             title="Delete Record"
                           >
                             <FaTrash className="text-[10px]" />
@@ -872,10 +884,10 @@ export default function Dashboard() {
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white font-['Outfit']">
+              <h2 className="text-2xl font-bold text-slate-900 font-['Outfit']">
                 Shelter & Relief Station Management
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600">
                 Manage registered safe zones, track bed capacities, and update medical contacts.
               </p>
             </div>
@@ -883,7 +895,7 @@ export default function Dashboard() {
             {isAdmin && (
               <button
                 onClick={() => setShowAddZoneModal(true)}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm"
               >
                 <FaPlus />
                 <span>Add Safe Zone</span>
@@ -893,15 +905,15 @@ export default function Dashboard() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {safeZones.map((zone) => (
-              <div key={zone._id} className="glass-card p-5 rounded-2xl border border-white/10 space-y-3">
+              <div key={zone._id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
                 <div className="flex items-start justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200">
                     {zone.type}
                   </span>
                   {isAdmin && (
                     <button
                       onClick={() => handleDeleteZone(zone._id)}
-                      className="text-slate-500 hover:text-rose-400 transition-colors p-1"
+                      className="text-slate-400 hover:text-rose-600 transition-colors p-1"
                       title="Remove Shelter"
                     >
                       <FaTrash className="text-xs" />
@@ -909,18 +921,18 @@ export default function Dashboard() {
                   )}
                 </div>
 
-                <h3 className="text-base font-bold text-white font-['Outfit']">{zone.name}</h3>
-                <p className="text-xs text-slate-300 flex items-start gap-1">
-                  <FaMapMarkerAlt className="text-rose-400 shrink-0 mt-0.5" />
+                <h3 className="text-base font-bold text-slate-900 font-['Outfit']">{zone.name}</h3>
+                <p className="text-xs text-slate-600 flex items-start gap-1">
+                  <FaMapMarkerAlt className="text-rose-500 shrink-0 mt-0.5" />
                   <span>{zone.address}</span>
                 </p>
 
-                <div className="flex items-center justify-between text-xs pt-2 border-t border-white/5">
-                  <span className="text-slate-400 flex items-center gap-1">
-                    <FaBed className="text-indigo-300" />
+                <div className="flex items-center justify-between text-xs pt-2 border-t border-slate-100">
+                  <span className="text-slate-500 flex items-center gap-1 font-medium">
+                    <FaBed className="text-indigo-600" />
                     <span>Capacity: {zone.capacity} beds</span>
                   </span>
-                  <a href={`tel:${zone.contact}`} className="text-indigo-300 font-semibold hover:underline">
+                  <a href={`tel:${zone.contact}`} className="text-indigo-600 font-bold hover:underline">
                     {zone.contact}
                   </a>
                 </div>
@@ -935,38 +947,38 @@ export default function Dashboard() {
         <div className="space-y-6 animate-in fade-in duration-200">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-bold text-white font-['Outfit']">
+              <h2 className="text-2xl font-bold text-slate-900 font-['Outfit']">
                 Live Crisis Broadcast Console
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600">
                 Publish high-priority safety advisories broadcasted across Home, News, and Citizen Portals.
               </p>
             </div>
 
-            <span className="px-3 py-1 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span>24h Auto-Expiry Window Active</span>
+            <span className="px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+              <span>Emergency Broadcast Network Active</span>
             </span>
           </div>
 
-          {/* 24-Hour Broadcast Engine Explanatory Banner */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/60 to-purple-950/60 border border-indigo-500/30 flex items-start gap-3 text-xs text-indigo-200">
-            <FaBullhorn className="text-indigo-400 shrink-0 text-base mt-0.5" />
+          {/* Broadcast Engine Explanatory Banner */}
+          <div className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 flex items-start gap-3 text-xs text-indigo-950 shadow-xs">
+            <FaBullhorn className="text-indigo-600 shrink-0 text-base mt-0.5" />
             <div className="space-y-1">
-              <p className="font-bold text-white">
+              <p className="font-bold text-indigo-950">
                 How Emergency Broadcasts Work:
               </p>
-              <p className="text-slate-300 leading-relaxed">
-                Bulletins published by Coordinators remain live for exactly <strong>24 hours</strong> across the entire AapdaMitra platform for all citizens and volunteers. After 24 hours, MongoDB automatically purges them to ensure outdated disaster information is never presented.
+              <p className="text-indigo-900/80 leading-relaxed">
+                Advisories published by Coordinators are distributed in real time across the entire AapdaMitra platform for all citizens and volunteers. Expired alerts are automatically managed by the system to ensure outdated information is never displayed.
               </p>
             </div>
           </div>
 
           {/* New Broadcast Form (Admin Only) */}
           {isAdmin ? (
-            <form onSubmit={handlePostBroadcast} className="glass-panel p-6 rounded-2xl border border-white/15 space-y-4">
-              <h3 className="font-bold text-white text-sm font-['Outfit'] flex items-center gap-2">
-                <FaBullhorn className="text-rose-400" /> Publish Urgent Safety Advisory (24-Hour Broadcast)
+            <form onSubmit={handlePostBroadcast} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+              <h3 className="font-bold text-slate-900 text-sm font-['Outfit'] flex items-center gap-2">
+                <FaBullhorn className="text-rose-600" /> Publish Urgent Safety Advisory
               </h3>
               <div>
                 <textarea
@@ -981,7 +993,7 @@ export default function Dashboard() {
 
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-2 text-xs">
-                  <span className="text-slate-300 font-medium">Alert Level:</span>
+                  <span className="text-slate-700 font-semibold">Alert Level:</span>
                   {["CRITICAL", "WARNING", "ADVISORY"].map((sev) => (
                     <button
                       type="button"
@@ -994,7 +1006,7 @@ export default function Dashboard() {
                             : sev === "WARNING"
                             ? "bg-amber-600 text-white"
                             : "bg-blue-600 text-white"
-                          : "bg-white/5 text-slate-400 hover:text-white"
+                          : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                       }`}
                     >
                       {sev}
@@ -1004,29 +1016,29 @@ export default function Dashboard() {
 
                 <button
                   type="submit"
-                  className="px-6 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 text-white font-bold text-xs shadow-md transition-all"
+                  className="px-6 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-sm transition-all"
                 >
-                  Broadcast to Network (24h)
+                  Broadcast to Network
                 </button>
               </div>
             </form>
           ) : (
-            <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-200">
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900">
               Only Disaster Coordinators (Admins) can post public alerts. Field Responders can monitor live advisories below.
             </div>
           )}
 
           {/* Broadcast List */}
           <div className="space-y-3">
-            <h3 className="text-sm font-bold text-slate-300 uppercase tracking-wider text-left">
+            <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider text-left">
               Active Network Advisories ({broadcasts.length})
             </h3>
 
             {broadcasts.length === 0 ? (
-              <div className="glass-card p-8 text-center rounded-2xl text-slate-400 space-y-2">
-                <FaCheckCircle className="text-emerald-400 text-2xl mx-auto" />
-                <p className="text-sm font-semibold text-white">No Active Emergency Advisories</p>
-                <p className="text-xs text-slate-400">All previous broadcasts have elapsed their 24-hour window and were automatically archived.</p>
+              <div className="bg-white p-8 text-center rounded-2xl text-slate-500 space-y-2 border border-slate-200 shadow-xs">
+                <FaCheckCircle className="text-emerald-600 text-2xl mx-auto" />
+                <p className="text-sm font-semibold text-slate-900">No Active Emergency Advisories</p>
+                <p className="text-xs text-slate-500">All previous advisories have been safely concluded and archived.</p>
               </div>
             ) : (
               broadcasts.map((b) => {
@@ -1037,47 +1049,47 @@ export default function Dashboard() {
                 return (
                   <div
                     key={bId}
-                    className={`glass-card p-5 rounded-2xl border transition-all ${
+                    className={`bg-white p-5 rounded-2xl border shadow-xs transition-all ${
                       isCrit
-                        ? "border-rose-500/40 bg-rose-500/5"
+                        ? "border-l-4 border-l-rose-600 border-rose-200 bg-rose-50/20"
                         : isWarn
-                        ? "border-amber-500/40 bg-amber-500/5"
-                        : "border-blue-500/40 bg-blue-500/5"
+                        ? "border-l-4 border-l-amber-500 border-amber-200 bg-amber-50/20"
+                        : "border-l-4 border-l-blue-600 border-blue-200 bg-blue-50/20"
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                       <div className="flex items-start gap-3 flex-1">
                         <FaBullhorn
                           className={`text-base shrink-0 mt-1 ${
-                            isCrit ? "text-rose-400 animate-pulse" : isWarn ? "text-amber-400" : "text-blue-400"
+                            isCrit ? "text-rose-600 animate-pulse" : isWarn ? "text-amber-600" : "text-blue-600"
                           }`}
                         />
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <span
-                              className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
+                              className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border ${
                                 isCrit
-                                  ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+                                  ? "bg-rose-100 text-rose-800 border-rose-300"
                                   : isWarn
-                                  ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-                                  : "bg-blue-500/20 text-blue-300 border-blue-500/30"
+                                  ? "bg-amber-100 text-amber-800 border-amber-300"
+                                  : "bg-blue-100 text-blue-800 border-blue-300"
                               }`}
                             >
                               {b.severity}
                             </span>
-                            <span className="text-[11px] text-slate-400">• By {b.author}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
-                              ⏳ {getTimeRemaining(b.createdAt)}
+                            <span className="text-[11px] text-slate-500">• By {b.author}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 font-mono">
+                              Issued {getTimeAgo(b.createdAt)}
                             </span>
                           </div>
-                          <p className="text-sm text-white font-medium leading-relaxed">{b.title}</p>
+                          <p className="text-sm text-slate-900 font-medium leading-relaxed">{b.title}</p>
                         </div>
                       </div>
 
                       {isAdmin && (
                         <button
                           onClick={() => handleDeleteBroadcast(bId)}
-                          className="text-slate-400 hover:text-rose-400 p-2 rounded-lg bg-white/5 hover:bg-rose-500/10 border border-white/10 transition-colors text-xs flex items-center gap-1 shrink-0"
+                          className="text-slate-500 hover:text-rose-600 p-2 rounded-lg bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-200 transition-colors text-xs flex items-center gap-1 shrink-0 font-semibold"
                           title="Withdraw Bulletin Early"
                         >
                           <FaTrash className="text-[10px]" />
@@ -1095,14 +1107,14 @@ export default function Dashboard() {
 
       {/* 7. Tab 4: Responder Guidelines */}
       {activeTab === "roster" && (
-        <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-white/15 space-y-6 text-left animate-in fade-in duration-200">
-          <h2 className="text-2xl font-bold text-white font-['Outfit']">
+        <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-md space-y-6 text-left animate-in fade-in duration-200 bg-white">
+          <h2 className="text-2xl font-bold text-slate-900 font-['Outfit']">
             Emergency Field Responder Operational Protocols
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-6 text-xs text-slate-300 leading-relaxed">
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-3">
-              <h3 className="font-bold text-white text-sm font-['Outfit'] flex items-center gap-2 text-rose-300">
+          <div className="grid md:grid-cols-2 gap-6 text-xs text-slate-700 leading-relaxed">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <h3 className="font-bold text-slate-900 text-sm font-['Outfit'] flex items-center gap-2 text-rose-700">
                 1. Mission Claiming Protocol
               </h3>
               <p>• Only claim a mission if your rescue team has vehicle/boat access to the listed coordinates.</p>
@@ -1110,8 +1122,8 @@ export default function Dashboard() {
               <p>• Keep command dispatch updated via radio or mobile data every 20 minutes.</p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-3">
-              <h3 className="font-bold text-white text-sm font-['Outfit'] flex items-center gap-2 text-emerald-300">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+              <h3 className="font-bold text-slate-900 text-sm font-['Outfit'] flex items-center gap-2 text-emerald-700">
                 2. Evacuation & Triage Protocol
               </h3>
               <p>• Prioritize infants, pregnant women, and injured elderly citizens for immediate hospital transport.</p>
@@ -1124,15 +1136,15 @@ export default function Dashboard() {
 
       {/* 8. Add Safe Zone Modal (Admin only) */}
       {showAddZoneModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl max-w-lg w-full border border-white/20 shadow-2xl space-y-5">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="text-xl font-bold text-white font-['Outfit']">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="glass-panel p-6 sm:p-8 rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl space-y-5 bg-white">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900 font-['Outfit']">
                 Register New Safe Zone
               </h3>
               <button
                 onClick={() => setShowAddZoneModal(false)}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-slate-700 text-sm"
               >
                 ✕
               </button>
@@ -1140,7 +1152,7 @@ export default function Dashboard() {
 
             <form onSubmit={handleCreateZone} className="space-y-4 text-left">
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Facility Name *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Facility Name *</label>
                 <input
                   type="text"
                   required
@@ -1153,11 +1165,11 @@ export default function Dashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Shelter Type</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Shelter Type</label>
                   <select
                     value={newZone.type}
                     onChange={(e) => setNewZone({ ...newZone, type: e.target.value })}
-                    className="glass-input w-full p-2.5 rounded-xl text-sm bg-[#1e2344]"
+                    className="glass-input w-full p-2.5 rounded-xl text-sm bg-white text-slate-900"
                   >
                     <option value="Shelter">Shelter</option>
                     <option value="Hospital">Hospital</option>
@@ -1168,7 +1180,7 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Capacity (Beds)</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Capacity (Beds)</label>
                   <input
                     type="number"
                     required
@@ -1180,7 +1192,7 @@ export default function Dashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Full Address *</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Full Address *</label>
                 <input
                   type="text"
                   required
@@ -1193,7 +1205,7 @@ export default function Dashboard() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Latitude</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Latitude</label>
                   <input
                     type="text"
                     required
@@ -1204,7 +1216,7 @@ export default function Dashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1">Longitude</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Longitude</label>
                   <input
                     type="text"
                     required
@@ -1216,7 +1228,7 @@ export default function Dashboard() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1">Contact Phone</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Phone</label>
                 <input
                   type="text"
                   required
@@ -1230,14 +1242,14 @@ export default function Dashboard() {
                 <button
                   type="button"
                   onClick={() => setShowAddZoneModal(false)}
-                  className="flex-1 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white text-xs font-semibold transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-all border border-slate-200"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submittingZone}
-                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md transition-all"
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md shadow-emerald-100 transition-all"
                 >
                   {submittingZone ? "Registering..." : "Save Safe Zone"}
                 </button>

@@ -40,7 +40,7 @@ router.post("/", async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Emergency bulletin broadcasted across network (valid for 24 hours)",
+      message: "Emergency bulletin broadcasted across network successfully",
       data: newBroadcast,
     });
   } catch (err) {

@@ -79,7 +79,7 @@ export default function AuthPage() {
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-12">
       
       {/* Background radial glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-600/15 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-4xl grid md:grid-cols-12 gap-8 items-center relative z-10">
         
@@ -89,32 +89,32 @@ export default function AuthPage() {
             <img
               src={Logo}
               alt="AapdaMitra"
-              className="w-16 h-16 object-contain rounded-2xl bg-white/10 p-2 border border-white/15 shadow-xl"
+              className="w-16 h-16 object-contain rounded-2xl bg-indigo-50 p-2 border border-indigo-100 shadow-sm"
             />
             <div>
-              <span className="text-3xl font-extrabold text-white font-['Outfit']">
+              <span className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
                 AapdaMitra
               </span>
-              <p className="text-xs text-indigo-300 font-semibold tracking-wider uppercase">
+              <p className="text-xs text-indigo-600 font-semibold tracking-wider uppercase">
                 Disaster Relief Network
               </p>
             </div>
           </NavLink>
 
           <div className="space-y-3">
-            <h2 className="text-2xl font-bold text-white font-['Outfit'] leading-tight">
+            <h2 className="text-2xl font-bold text-slate-900 font-['Outfit'] leading-tight">
               Rapid Humanitarian Response Network
             </h2>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               Sign in to manage emergency alerts, report disaster hazards, and coordinate shelter logistics with responders in your area.
             </p>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2 text-xs text-slate-300 w-full">
-            <div className="flex items-center gap-2 font-semibold text-emerald-400">
+          <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2 text-xs text-slate-700 w-full">
+            <div className="flex items-center gap-2 font-semibold text-emerald-700">
               <FaShieldAlt /> Verified & Encrypted
             </div>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-slate-500">
               Your contact data and credentials remain securely safeguarded per disaster relief protocols.
             </p>
           </div>
@@ -122,17 +122,17 @@ export default function AuthPage() {
 
         {/* Right Side: Auth Form Card */}
         <div className="md:col-span-7">
-          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-white/15 shadow-2xl space-y-6 text-left">
+          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-lg space-y-6 text-left bg-white">
             
             {/* Tab Switcher */}
-            <div className="flex items-center bg-white/5 p-1 rounded-2xl border border-white/10">
+            <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
                 type="button"
                 onClick={() => setIsRegister(false)}
                 className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
                   !isRegister
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Sign In
@@ -142,8 +142,8 @@ export default function AuthPage() {
                 onClick={() => setIsRegister(true)}
                 className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
                   isRegister
-                    ? "bg-indigo-600 text-white shadow-md shadow-indigo-900/40"
-                    : "text-slate-400 hover:text-white"
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 Create Account
@@ -151,10 +151,10 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white font-['Outfit']">
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-['Outfit']">
                 {isRegister ? "Join the AapdaMitra Network" : "Welcome Back"}
               </h2>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-500 mt-1">
                 {isRegister
                   ? "Register as a citizen, volunteer, or relief coordinator."
                   : "Enter your username and password to continue."}
@@ -166,7 +166,7 @@ export default function AuthPage() {
               {/* Full Name (Only when registering) */}
               {isRegister && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Full Name *
                   </label>
                   <div className="relative">
@@ -185,7 +185,7 @@ export default function AuthPage() {
 
               {/* Username or Email */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Username or Email *
                 </label>
                 <div className="relative">
@@ -203,7 +203,7 @@ export default function AuthPage() {
 
               {/* Password */}
               <div>
-                <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Password *
                 </label>
                 <div className="relative">
@@ -219,7 +219,7 @@ export default function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-white text-xs"
+                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 text-xs"
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
@@ -229,7 +229,7 @@ export default function AuthPage() {
               {/* Confirm Password (Only when registering) */}
               {isRegister && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Confirm Password *
                   </label>
                   <div className="relative">
@@ -249,13 +249,13 @@ export default function AuthPage() {
               {/* Role Selection (Only when registering) */}
               {isRegister && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-300 mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                     Account Role
                   </label>
                   <select
                     value={form.role}
                     onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="glass-input w-full px-3.5 py-2.5 rounded-xl text-sm outline-none bg-[#1a1e3d]"
+                    className="glass-input w-full px-3.5 py-2.5 rounded-xl text-sm outline-none bg-white text-slate-900"
                   >
                     <option value="user">Citizen / User</option>
                     <option value="volunteer">Rescue Volunteer</option>
@@ -268,7 +268,7 @@ export default function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm shadow-lg shadow-indigo-950/40 hover:scale-[1.01] transition-all disabled:opacity-50"
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 hover:scale-[1.01] transition-all disabled:opacity-50"
               >
                 {loading ? (
                   <>
@@ -285,7 +285,7 @@ export default function AuthPage() {
             <div className="text-center pt-2">
               <NavLink
                 to="/"
-                className="text-xs text-slate-400 hover:text-indigo-300 transition-colors"
+                className="text-xs text-slate-500 hover:text-indigo-600 font-medium transition-colors"
               >
                 ← Back to Home
               </NavLink>
