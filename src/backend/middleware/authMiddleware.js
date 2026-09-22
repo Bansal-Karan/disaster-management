@@ -8,13 +8,14 @@ export const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const secret = process.env.JWT_SECRET || "bansalthegreat";
+        const decoded = jwt.verify(token, secret);
         req.user = decoded;
         next();
     } catch (error) {
-        console.log("Error in AuthMiddleware ", error);
-        return res.status(500).json({
-            message: "Internal Server Error",
+        console.log("Error in AuthMiddleware:", error.message || error);
+        return res.status(401).json({
+            message: "Session expired or invalid token. Please log in again.",
             success: false
         });
     }

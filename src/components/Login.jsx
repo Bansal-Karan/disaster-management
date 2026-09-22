@@ -1,73 +1,49 @@
 import React, { useState } from "react";
-import { FaUser, FaLock, FaIdBadge, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner } from "react-icons/fa";
+import { FaUser, FaLock, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner } from "react-icons/fa";
 import Logo from "../assets/logo.png";
 import { useNavigate, NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export default function AuthPage() {
+export default function AdminLoginPage() {
   const navigate = useNavigate();
-  const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    name: "",
     username: "",
     password: "",
-    confirmPassword: "",
-    role: "user",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if (isRegister && form.password !== form.confirmPassword) {
-      toast.error("Passwords do not match!");
+    if (!form.username.trim() || !form.password) {
+      toast.error("Please enter both administrator email and password.");
       return;
     }
 
     setLoading(true);
 
     try {
-      if (isRegister) {
-        const res = await fetch(`${API_URL}/api/user/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(form),
-        });
+      const res = await fetch(`${API_URL}/api/user/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: form.username.trim(),
+          password: form.password,
+        }),
+      });
 
-        const data = await res.json();
-        if (res.ok && data.success) {
-          toast.success(data.message || "Account registered successfully! Please log in.");
-          setIsRegister(false);
-        } else {
-          toast.error(data.message || "Registration failed. Please check your credentials.");
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem("token", data.token);
+        if (data.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
         }
+        toast.success(data.message || "Welcome, Admin! Command Center unlocked.");
+        navigate("/dashboard");
       } else {
-        const res = await fetch(`${API_URL}/api/user/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: form.username,
-            password: form.password,
-          }),
-        });
-
-        const data = await res.json();
-        if (res.ok && data.success) {
-          localStorage.setItem("token", data.token);
-          if (data.user) {
-            localStorage.setItem("user", JSON.stringify(data.user));
-          }
-          if (data.user?.role === 'admin' || data.user?.role === 'volunteer') {
-            navigate("/dashboard");
-          } else {
-            navigate("/");
-          }
-        } else {
-          toast.error(data.message || "Invalid credentials.");
-        }
+        toast.error(data.message || "Invalid credentials. Please verify your admin credentials.");
       }
     } catch (error) {
       console.log("Auth error:", error);
@@ -78,14 +54,14 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-
+    <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-12 bg-slate-50">
+      
       {/* Background radial glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-4xl grid md:grid-cols-12 gap-8 items-center relative z-10">
-
-        {/* Left Side: Brand & Mission Info (Hidden on small mobile) */}
+        
+        {/* Left Side: Brand & Mission Info */}
         <div className="hidden md:flex md:col-span-5 flex-col items-start space-y-6 text-left">
           <NavLink to="/" className="inline-flex items-center gap-3">
             <img
@@ -104,99 +80,62 @@ export default function AuthPage() {
           </NavLink>
 
           <div className="space-y-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+              <FaShieldAlt className="text-amber-600" /> Authorized Personnel Only
+            </span>
             <h2 className="text-2xl font-bold text-slate-900 font-['Outfit'] leading-tight">
-              Rapid Humanitarian Response Network
+              Incident Command Center
             </h2>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Sign in to manage emergency alerts, report disaster hazards, and coordinate shelter logistics with responders in your area.
+              Restricted portal for Disaster Response Coordinators to manage high-priority SOS dispatches, safe zones, and broadcast critical emergency bulletins.
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2 text-xs text-slate-700 w-full">
-            <div className="flex items-center gap-2 font-semibold text-emerald-700">
-              <FaShieldAlt /> Verified & Encrypted
+            <div className="flex items-center gap-2 font-semibold text-indigo-700">
+              <FaShieldAlt /> Single Designated Administrator
             </div>
-            <p className="text-[11px] text-slate-500">
-              Your contact data and credentials remain securely safeguarded per disaster relief protocols.
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              Public user registration is disabled. System access is restricted to the platform administrator.
             </p>
           </div>
         </div>
 
-        {/* Right Side: Auth Form Card */}
+        {/* Right Side: Admin Login Card */}
         <div className="md:col-span-7">
-          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-lg space-y-6 text-left bg-white">
-
-            {/* Tab Switcher */}
-            <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
-              <button
-                type="button"
-                onClick={() => setIsRegister(false)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${!isRegister
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                  }`}
-              >
-                Sign In
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsRegister(true)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${isRegister
-                    ? "bg-indigo-600 text-white shadow-xs"
-                    : "text-slate-600 hover:text-slate-900"
-                  }`}
-              >
-                Create Account
-              </button>
-            </div>
-
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-['Outfit']">
-                {isRegister ? "Join the AapdaMitra Network" : "Welcome Back"}
-              </h2>
-              <p className="text-xs text-slate-500 mt-1">
-                {isRegister
-                  ? "Register as a citizen, volunteer, or relief coordinator."
-                  : "Enter your username and password to continue."}
-              </p>
+          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-xl space-y-6 text-left bg-white">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-['Outfit'] flex items-center gap-2">
+                  Admin Sign In
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Enter your administrator credentials to access the command dashboard.
+                </p>
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                Admin
+              </span>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-
-              {/* Full Name (Only when registering) */}
-              {isRegister && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Full Name *
-                  </label>
-                  <div className="relative">
-                    <FaIdBadge className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Karan Bansal"
-                      value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })}
-                      className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Username or Email */}
+              
+              {/* Admin Email */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Username or Email *
+                  Administrator Email *
                 </label>
                 <div className="relative">
                   <FaUser className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
                   <input
-                    type="text"
+                    type="email"
                     required
-                    placeholder="e.g. bansal@gmail.com or Bansal"
+                    placeholder="e.g. karan@admin.com"
                     value={form.username}
                     onChange={(e) => setForm({ ...form, username: e.target.value })}
-                    className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
+                    className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-indigo-500"
                   />
                 </div>
               </div>
@@ -204,98 +143,57 @@ export default function AuthPage() {
               {/* Password */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Password *
+                  Admin Password *
                 </label>
                 <div className="relative">
                   <FaLock className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
                   <input
                     type={showPassword ? "text" : "password"}
                     required
-                    placeholder="Enter password"
+                    placeholder="••••••••••••"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="glass-input w-full pl-9 pr-10 py-2.5 rounded-xl text-sm"
+                    className="glass-input w-full pl-9 pr-10 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-indigo-500"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 text-xs"
+                    className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-600 cursor-pointer text-xs"
                   >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
               </div>
 
-              {/* Confirm Password (Only when registering) */}
-              {isRegister && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Confirm Password *
-                  </label>
-                  <div className="relative">
-                    <FaLock className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      placeholder="Re-enter password"
-                      value={form.confirmPassword}
-                      onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
-                      className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm"
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Role Selection (Only when registering) */}
-              {isRegister && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Account Role
-                  </label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="glass-input w-full px-3.5 py-2.5 rounded-xl text-sm outline-none bg-white text-slate-900"
-                  >
-                    <option value="user">Citizen / User</option>
-                    <option value="volunteer">Rescue Volunteer</option>
-                    <option value="admin">Disaster Response Coordinator (Admin)</option>
-                  </select>
-                </div>
-              )}
-
               {/* Submit Button */}
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200 hover:scale-[1.01] transition-all disabled:opacity-50"
+                className="w-full py-3 rounded-xl font-bold text-sm text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-100 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
                   <>
                     <FaSpinner className="animate-spin text-sm" />
-                    <span>{isRegister ? "Creating Account..." : "Signing In..."}</span>
+                    <span>Verifying Credentials...</span>
                   </>
                 ) : (
-                  <span>{isRegister ? "Complete Registration" : "Sign In to Account"}</span>
+                  <span>Access Command Center</span>
                 )}
               </button>
 
             </form>
 
-            <div className="text-center pt-2">
-              <NavLink
-                to="/"
-                className="text-xs text-slate-500 hover:text-indigo-600 font-medium transition-colors"
-              >
-                ← Back to Home
-              </NavLink>
+            {/* Footer Notice */}
+            <div className="pt-2 text-center border-t border-slate-100">
+              <p className="text-[11px] text-slate-400">
+                Unauthorized access attempts are logged per Disaster Management protocols.
+              </p>
             </div>
 
           </div>
         </div>
 
       </div>
-
     </div>
   );
 }

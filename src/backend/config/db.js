@@ -5,16 +5,19 @@ dotenv.config();
 let lastDbError = null;
 let isConnecting = false;
 
+const getMongoUri = () => process.env.MONGODB_URI || process.env.MONGO_URI;
+
 const connectDb = async () => {
     if (mongoose.connection.readyState === 1 || isConnecting) return;
-    if (!process.env.MONGO_URI) {
-        lastDbError = "MONGO_URI environment variable is not defined on server.";
+    const uri = getMongoUri();
+    if (!uri) {
+        lastDbError = "MONGO_URI / MONGODB_URI environment variable is not defined on server.";
         console.error("⚠️ " + lastDbError);
         return;
     }
     try {
         isConnecting = true;
-        await mongoose.connect(process.env.MONGO_URI, {
+        await mongoose.connect(uri, {
             serverSelectionTimeoutMS: 5000,
         });
         lastDbError = null;
@@ -29,7 +32,7 @@ const connectDb = async () => {
 
 // Automatically retry connection every 5 seconds until successful
 const retryTimer = setInterval(() => {
-    if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+    if (mongoose.connection.readyState === 0 && getMongoUri()) {
         connectDb();
     } else if (mongoose.connection.readyState === 1) {
         clearInterval(retryTimer);
