@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../assets/logo.png';
-import { FaBars, FaTimes, FaShieldAlt, FaExclamationTriangle, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaBars, FaTimes, FaExclamationTriangle, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -175,8 +175,8 @@ const Navbar = () => {
                 to="/login"
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs xl:text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800 shadow-xs transition-all whitespace-nowrap shrink-0"
               >
-                <FaUserCircle className="text-slate-300" />
-                <span>Sign In</span>
+                <FaUserCircle className="text-slate-300 text-xs" />
+                <span>Sign In / Join</span>
               </NavLink>
             )}
           </div>
@@ -263,10 +263,10 @@ const Navbar = () => {
               <NavLink
                 to="/login"
                 onClick={() => setMobileMenuOpen(false)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-500"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-white bg-slate-900 hover:bg-slate-800"
               >
-                <FaUserCircle />
-                <span>Sign In / Register</span>
+                <FaUserCircle className="text-slate-300 text-xs" />
+                <span>Sign In / Join</span>
               </NavLink>
             )}
           </div>

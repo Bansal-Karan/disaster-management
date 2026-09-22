@@ -1,11 +1,23 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import User from '../models/userModel.js';
 import { authMiddleware } from '../middleware/authMiddleware.js';
 import mongoose from 'mongoose';
 
+dotenv.config();
+
 const router = express.Router();
+
+// Helper to retrieve JWT Secret strictly from environment variables (.env)
+const getJwtSecret = () => {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        throw new Error("JWT_SECRET is missing. Please define it in your .env file.");
+    }
+    return secret;
+};
 
 // Helper to dynamically read admin credentials from environment variables (.env)
 const getAdminCredentials = () => {
@@ -14,22 +26,67 @@ const getAdminCredentials = () => {
     return {
         email,
         password,
-        prefix: email.split("@")[0],
+        prefix: email ? email.split("@")[0] : "",
         user: {
-            id: "admin-karan-001",
-            name: "Karan Bansal",
-            username: email || "karan@admin.com",
+            id: "admin-system-001",
+            name: process.env.ADMIN_NAME || "Administrator",
+            username: email,
             role: "admin",
         }
     };
 };
 
-// Public user registration is disabled per specification (Single fixed Admin system)
+// Allow registration for Citizens and Volunteers only (Admin account is fixed and restricted)
 router.post('/register', async (req, res) => {
-    return res.status(403).json({
-        success: false,
-        message: "Public registration is disabled. System access is restricted to authorized Administrator."
-    });
+    try {
+        const { name, username, password, role } = req.body;
+        if (!username || !password || !name) {
+            return res.status(400).json({ success: false, message: "Please provide name, username/email, and password." });
+        }
+
+        const cleanUsername = username.trim().toLowerCase();
+        const admin = getAdminCredentials();
+
+        // Strictly block anyone trying to register as Admin
+        if (role === 'admin' || cleanUsername === admin.email || cleanUsername === admin.prefix) {
+            return res.status(403).json({
+                success: false,
+                message: "Admin account creation is prohibited. System administrator is pre-configured."
+            });
+        }
+
+        // Assigned role is either volunteer or user (default: user)
+        const assignedRole = role === 'volunteer' ? 'volunteer' : 'user';
+
+        if (mongoose.connection.readyState !== 1) {
+            return res.status(503).json({
+                success: false,
+                message: "Database connecting. Please wait a moment and try again."
+            });
+        }
+
+        const existingUser = await User.findOne({ username: cleanUsername });
+        if (existingUser) {
+            return res.status(400).json({ success: false, message: "An account with this username/email already exists." });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = await User.create({
+            name: name.trim(),
+            username: cleanUsername,
+            role: assignedRole,
+            password: hashedPassword,
+        });
+
+        res.status(201).json({
+            success: true,
+            message: `${assignedRole === 'volunteer' ? 'Field Volunteer' : 'Citizen'} account registered successfully! You can now sign in.`,
+            data: { id: newUser._id, name: newUser.name, username: newUser.username, role: newUser.role }
+        });
+    } catch (error) {
+        console.error("Error in /register:", error);
+        res.status(500).json({ success: false, message: "Registration failed. Please try again." });
+    }
 });
 
 router.post('/login', async (req, res) => {
@@ -47,7 +104,7 @@ router.post('/login', async (req, res) => {
         const isPasswordMatch = admin.password && password === admin.password;
 
         if (isEmailMatch && isPasswordMatch) {
-            const secret = process.env.JWT_SECRET || "bansalthegreat";
+            const secret = getJwtSecret();
             const token = jwt.sign(
                 { username: admin.user.username, role: admin.user.role, id: admin.user.id, name: admin.user.name },
                 secret,
@@ -79,7 +136,7 @@ router.post('/login', async (req, res) => {
 
             return res.status(200).json({
                 success: true,
-                message: "Administrator authenticated successfully",
+                message: "Signed in successfully",
                 token,
                 user: admin.user
             });
@@ -95,7 +152,7 @@ router.post('/login', async (req, res) => {
             if (existingUser) {
                 const passwordMatch = await bcrypt.compare(password, existingUser.password);
                 if (passwordMatch) {
-                    const secret = process.env.JWT_SECRET || "bansalthegreat";
+                    const secret = getJwtSecret();
                     const userRole = existingUser.role || "user";
                     const token = jwt.sign(
                         { username: existingUser.username, role: userRole, id: existingUser._id },
@@ -120,10 +177,16 @@ router.post('/login', async (req, res) => {
 
         return res.status(401).json({
             success: false,
-            message: "Invalid credentials. Authorized admin access only."
+            message: "Invalid username/email or password."
         });
     } catch (error) {
-        console.error("Error in /login:", error);
+        console.error("Error in /login:", error.message || error);
+        if (error.message && error.message.includes("JWT_SECRET")) {
+            return res.status(500).json({
+                success: false,
+                message: "Server configuration error: JWT_SECRET missing in .env"
+            });
+        }
         res.status(500).json({ success: false, message: "Authentication service error" });
     }
 });

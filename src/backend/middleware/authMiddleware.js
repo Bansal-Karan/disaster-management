@@ -1,4 +1,7 @@
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const authMiddleware = async (req, res, next) => {
     try {
@@ -8,7 +11,15 @@ export const authMiddleware = async (req, res, next) => {
             return res.status(401).json({ success: false, message: "Unauthorized" });
         }
 
-        const secret = process.env.JWT_SECRET || "bansalthegreat";
+        const secret = process.env.JWT_SECRET;
+        if (!secret) {
+            console.error("AuthMiddleware Error: JWT_SECRET missing in .env");
+            return res.status(500).json({
+                success: false,
+                message: "Server configuration error: JWT_SECRET is not configured in .env."
+            });
+        }
+
         const decoded = jwt.verify(token, secret);
         req.user = decoded;
         next();

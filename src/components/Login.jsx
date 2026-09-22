@@ -1,49 +1,82 @@
 import React, { useState } from "react";
-import { FaUser, FaLock, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner } from "react-icons/fa";
+import { FaUser, FaLock, FaIdBadge, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner, FaHandsHelping, FaCheckCircle } from "react-icons/fa";
 import Logo from "../assets/logo.png";
 import { useNavigate, NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
-export default function AdminLoginPage() {
+export default function AuthPage() {
   const navigate = useNavigate();
+  const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
+    name: "",
     username: "",
     password: "",
+    confirmPassword: "",
+    role: "user",
   });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.username.trim() || !form.password) {
-      toast.error("Please enter both administrator email and password.");
+
+    if (isRegister && form.password !== form.confirmPassword) {
+      toast.error("Passwords do not match!");
       return;
     }
 
     setLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/api/user/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: form.username.trim(),
-          password: form.password,
-        }),
-      });
+      if (isRegister) {
+        const res = await fetch(`${API_URL}/api/user/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: form.name.trim(),
+            username: form.username.trim(),
+            password: form.password,
+            role: form.role, // 'user' or 'volunteer'
+          }),
+        });
 
-      const data = await res.json();
-      if (res.ok && data.success) {
-        localStorage.setItem("token", data.token);
-        if (data.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
+        const data = await res.json();
+        if (res.ok && data.success) {
+          toast.success(data.message || "Account registered successfully! Please sign in.");
+          setIsRegister(false);
+          setForm({ ...form, password: "", confirmPassword: "" });
+        } else {
+          toast.error(data.message || "Registration failed. Please check your credentials.");
         }
-        toast.success(data.message || "Welcome, Admin! Command Center unlocked.");
-        navigate("/dashboard");
       } else {
-        toast.error(data.message || "Invalid credentials. Please verify your admin credentials.");
+        const res = await fetch(`${API_URL}/api/user/login`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: form.username.trim(),
+            password: form.password,
+          }),
+        });
+
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem("token", data.token);
+          if (data.user) {
+            localStorage.setItem("user", JSON.stringify(data.user));
+          }
+
+          if (data.user?.role === "admin" || data.user?.role === "volunteer") {
+            toast.success(`Welcome back, ${data.user?.name || "Responder"}!`);
+            navigate("/dashboard");
+          } else {
+            toast.success(`Welcome, ${data.user?.name || "Citizen"}!`);
+            navigate("/");
+          }
+        } else {
+          toast.error(data.message || "Invalid credentials. Please verify your username and password.");
+        }
       }
     } catch (error) {
       console.log("Auth error:", error);
@@ -80,59 +113,99 @@ export default function AdminLoginPage() {
           </NavLink>
 
           <div className="space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
-              <FaShieldAlt className="text-amber-600" /> Authorized Personnel Only
-            </span>
             <h2 className="text-2xl font-bold text-slate-900 font-['Outfit'] leading-tight">
-              Incident Command Center
+              Rapid Emergency & Relief Network
             </h2>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Restricted portal for Disaster Response Coordinators to manage high-priority SOS dispatches, safe zones, and broadcast critical emergency bulletins.
+              Sign in to manage emergency alerts, enroll as a field volunteer, or coordinate relief logistics in your community.
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs space-y-2 text-xs text-slate-700 w-full">
-            <div className="flex items-center gap-2 font-semibold text-indigo-700">
-              <FaShieldAlt /> Single Designated Administrator
+            <div className="flex items-center gap-2 font-semibold text-emerald-700">
+              <FaShieldAlt /> Verified & Encrypted
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed">
-              Public user registration is disabled. System access is restricted to the platform administrator.
+              Your account and contact information remain protected under strict disaster relief and privacy standards.
             </p>
           </div>
         </div>
 
-        {/* Right Side: Admin Login Card */}
+        {/* Right Side: Auth Form Card */}
         <div className="md:col-span-7">
           <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-xl space-y-6 text-left bg-white">
             
-            {/* Header */}
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-['Outfit'] flex items-center gap-2">
-                  Admin Sign In
-                </h2>
-                <p className="text-xs text-slate-500 mt-1">
-                  Enter your administrator credentials to access the command dashboard.
-                </p>
-              </div>
-              <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                Admin
-              </span>
+            {/* Tab Switcher: Sign In vs Create Account */}
+            <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
+              <button
+                type="button"
+                onClick={() => setIsRegister(false)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${
+                  !isRegister
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsRegister(true)}
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${
+                  isRegister
+                    ? "bg-indigo-600 text-white shadow-xs"
+                    : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            {/* Header Text */}
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 font-['Outfit']">
+                {isRegister ? "Join AapdaMitra Network" : "Welcome Back"}
+              </h2>
+              <p className="text-xs text-slate-500 mt-1">
+                {isRegister
+                  ? "Register as a Citizen or Field Volunteer."
+                  : "Sign in with your username or email to continue."}
+              </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               
-              {/* Admin Email */}
+              {/* Full Name (Only when registering) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Full Name *
+                  </label>
+                  <div className="relative">
+                    <FaIdBadge className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Ramesh Kumar"
+                      value={form.name}
+                      onChange={(e) => setForm({ ...form, name: e.target.value })}
+                      className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Username or Email */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Administrator Email *
+                  Username or Email *
                 </label>
                 <div className="relative">
                   <FaUser className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
                   <input
-                    type="email"
+                    type="text"
                     required
-                    placeholder="e.g. karan@admin.com"
+                    placeholder={isRegister ? "e.g. ramesh@gmail.com or ramesh12" : "e.g. yourname@gmail.com or username"}
                     value={form.username}
                     onChange={(e) => setForm({ ...form, username: e.target.value })}
                     className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-indigo-500"
@@ -143,14 +216,14 @@ export default function AdminLoginPage() {
               {/* Password */}
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                  Admin Password *
+                  Password *
                 </label>
                 <div className="relative">
                   <FaLock className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
                   <input
                     type={showPassword ? "text" : "password"}
                     required
-                    placeholder="••••••••••••"
+                    placeholder="Enter password"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                     className="glass-input w-full pl-9 pr-10 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-indigo-500"
@@ -165,6 +238,43 @@ export default function AdminLoginPage() {
                 </div>
               </div>
 
+              {/* Confirm Password (Only when registering) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Confirm Password *
+                  </label>
+                  <div className="relative">
+                    <FaLock className="absolute left-3.5 top-3.5 text-slate-400 text-xs" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      placeholder="Re-enter password"
+                      value={form.confirmPassword}
+                      onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
+                      className="glass-input w-full pl-9 pr-4 py-2.5 rounded-xl text-sm border border-slate-200 focus:border-indigo-500"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Role Selection (Citizens and Volunteers only) */}
+              {isRegister && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                    Enrollment Role *
+                  </label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm({ ...form, role: e.target.value })}
+                    className="glass-input w-full px-3.5 py-2.5 rounded-xl text-sm outline-none bg-white text-slate-900 border border-slate-200 focus:border-indigo-500 cursor-pointer"
+                  >
+                    <option value="user">Citizen / Public User</option>
+                    <option value="volunteer">Field Rescue Volunteer</option>
+                  </select>
+                </div>
+              )}
+
               {/* Submit Button */}
               <button
                 type="submit"
@@ -174,10 +284,10 @@ export default function AdminLoginPage() {
                 {loading ? (
                   <>
                     <FaSpinner className="animate-spin text-sm" />
-                    <span>Verifying Credentials...</span>
+                    <span>{isRegister ? "Registering..." : "Signing In..."}</span>
                   </>
                 ) : (
-                  <span>Access Command Center</span>
+                  <span>{isRegister ? "Complete Registration" : "Sign In to AapdaMitra"}</span>
                 )}
               </button>
 
@@ -186,7 +296,9 @@ export default function AdminLoginPage() {
             {/* Footer Notice */}
             <div className="pt-2 text-center border-t border-slate-100">
               <p className="text-[11px] text-slate-400">
-                Unauthorized access attempts are logged per Disaster Management protocols.
+                {isRegister
+                  ? "Already have an account? Click Sign In above."
+                  : "Need to join? Click Create Account above to register as a Citizen or Volunteer."}
               </p>
             </div>
 
