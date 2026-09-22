@@ -21,6 +21,8 @@ import {
   FaBed
 } from "react-icons/fa";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
@@ -89,7 +91,7 @@ export default function Dashboard() {
 
   const fetchBroadcasts = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/broadcasts");
+      const res = await fetch(`${API_URL}/api/broadcasts`);
       const json = await res.json();
       if (json.success && Array.isArray(json.data) && json.data.length > 0) {
         setBroadcasts(json.data);
@@ -120,7 +122,7 @@ export default function Dashboard() {
   const fetchIncidents = async () => {
     setLoadingIncidents(true);
     try {
-      const res = await fetch("http://localhost:5000/api/sos");
+      const res = await fetch(`${API_URL}/api/sos`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setIncidents(data);
@@ -204,7 +206,7 @@ export default function Dashboard() {
 
   const fetchSafeZones = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/safeZones");
+      const res = await fetch(`${API_URL}/api/safeZones`);
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         setSafeZones(data);
@@ -220,7 +222,7 @@ export default function Dashboard() {
   // Update SOS status (Claim mission / Resolve)
   const handleUpdateStatus = async (id, newStatus, assignedVolunteer = null) => {
     try {
-      const res = await fetch(`http://localhost:5000/api/sos/${id}/status`, {
+      const res = await fetch(`${API_URL}/api/sos/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -276,7 +278,7 @@ export default function Dashboard() {
   // Delete incident
   const handleDeleteIncident = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/sos/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/sos/${id}`, { method: "DELETE" });
       setIncidents((prev) => prev.filter((i) => i._id !== id));
       toast.success("Incident record removed");
     } catch {
@@ -291,7 +293,7 @@ export default function Dashboard() {
     setSubmittingZone(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/safeZones", {
+      const res = await fetch(`${API_URL}/api/safeZones`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(newZone),
@@ -322,7 +324,7 @@ export default function Dashboard() {
   // Delete Safe Zone
   const handleDeleteZone = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/safeZones/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/safeZones/${id}`, { method: "DELETE" });
       setSafeZones((prev) => prev.filter((z) => z._id !== id));
       toast.success("Safe zone removed");
     } catch {
@@ -343,7 +345,7 @@ export default function Dashboard() {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/broadcasts", {
+      const res = await fetch(`${API_URL}/api/broadcasts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -379,7 +381,7 @@ export default function Dashboard() {
   // Delete Broadcast early
   const handleDeleteBroadcast = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/broadcasts/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/broadcasts/${id}`, { method: "DELETE" });
       setBroadcasts((prev) => prev.filter((b) => (b._id || b.id) !== id));
       toast.success("Broadcast advisory withdrawn");
     } catch {

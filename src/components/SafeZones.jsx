@@ -14,6 +14,8 @@ import {
   FaCheckCircle
 } from "react-icons/fa";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 // Component to dynamically pan and zoom map when a safe zone card is clicked
 function MapController({ selectedCoords }) {
   const map = useMap();
@@ -151,7 +153,7 @@ export default function SafeZones() {
   const [selectedCoords, setSelectedCoords] = useState(null);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/safezones")
+    fetch(`${API_URL}/api/safezones`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {

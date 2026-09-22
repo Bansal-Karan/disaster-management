@@ -72,12 +72,14 @@ const preparednessGuides = {
   },
 };
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const Home = () => {
   const [activeGuide, setActiveGuide] = useState('floods');
   const [broadcasts, setBroadcasts] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/broadcasts')
+    fetch(`${API_URL}/api/broadcasts`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success && Array.isArray(json.data)) {

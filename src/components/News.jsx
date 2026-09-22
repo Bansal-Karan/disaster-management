@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import NewsSection from './NewsSection';
 import { FaExclamationTriangle, FaBullhorn, FaShieldAlt, FaClock } from 'react-icons/fa';
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 const News = () => {
   const [broadcasts, setBroadcasts] = useState([]);
   const [loadingBroadcasts, setLoadingBroadcasts] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/broadcasts')
+    fetch(`${API_URL}/api/broadcasts`)
       .then((res) => res.json())
       .then((json) => {
         if (json.success && Array.isArray(json.data)) {

@@ -12,6 +12,8 @@ import { Toaster } from "react-hot-toast"
 import { useEffect, useState } from 'react';
 
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 function App() {
 
 
@@ -22,7 +24,7 @@ function App() {
       if (!token) return;
 
       try {
-        const res = await fetch('http://localhost:5000/api/user/check-auth', {
+        const res = await fetch(`${API_URL}/api/user/check-auth`, {
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}`

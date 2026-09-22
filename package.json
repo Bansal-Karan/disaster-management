@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "cd src/backend && nodemon server.js",
-    "client": "cd src && npm run dev"
+    "client": "cd src && npm run dev",
+    "start": "node src/backend/server.js"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",

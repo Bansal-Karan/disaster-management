@@ -4,6 +4,8 @@ import Logo from "../assets/logo.png";
 import { useNavigate, NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 export default function AuthPage() {
   const navigate = useNavigate();
   const [isRegister, setIsRegister] = useState(false);
@@ -29,7 +31,7 @@ export default function AuthPage() {
 
     try {
       if (isRegister) {
-        const res = await fetch("http://localhost:5000/api/user/register", {
+        const res = await fetch(`${API_URL}/api/user/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
@@ -43,7 +45,7 @@ export default function AuthPage() {
           toast.error(data.message || "Registration failed. Please check your credentials.");
         }
       } else {
-        const res = await fetch("http://localhost:5000/api/user/login", {
+        const res = await fetch(`${API_URL}/api/user/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -77,12 +79,12 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-12">
-      
+
       {/* Background radial glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
 
       <div className="w-full max-w-4xl grid md:grid-cols-12 gap-8 items-center relative z-10">
-        
+
         {/* Left Side: Brand & Mission Info (Hidden on small mobile) */}
         <div className="hidden md:flex md:col-span-5 flex-col items-start space-y-6 text-left">
           <NavLink to="/" className="inline-flex items-center gap-3">
@@ -123,28 +125,26 @@ export default function AuthPage() {
         {/* Right Side: Auth Form Card */}
         <div className="md:col-span-7">
           <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-lg space-y-6 text-left bg-white">
-            
+
             {/* Tab Switcher */}
             <div className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
               <button
                 type="button"
                 onClick={() => setIsRegister(false)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
-                  !isRegister
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${!isRegister
                     ? "bg-indigo-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => setIsRegister(true)}
-                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${
-                  isRegister
+                className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center ${isRegister
                     ? "bg-indigo-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 Create Account
               </button>
@@ -162,7 +162,7 @@ export default function AuthPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              
+
               {/* Full Name (Only when registering) */}
               {isRegister && (
                 <div>

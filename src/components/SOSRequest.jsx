@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 import { 
   FaExclamationTriangle, 
   FaCrosshairs, 
@@ -81,7 +83,7 @@ export default function SOSRequest() {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/api/sos", {
+      const res = await fetch(`${API_URL}/api/sos`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
