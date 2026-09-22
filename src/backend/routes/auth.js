@@ -30,8 +30,14 @@ router.post('/register', async (req, res) => {
 
         res.json({ success: true, message: "User registered successfully", data: newUser });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Internal Server Error" });
         console.log("Error in /register ", error);
+        const isDbError = error.name === 'MongooseError' || error.message?.includes('buffering timed out') || error.message?.includes('ECONNREFUSED');
+        res.status(500).json({ 
+            success: false, 
+            message: isDbError 
+                ? "Database unavailable: MongoDB Atlas connection is currently pending or blocked by IP whitelist." 
+                : (error.message || "Internal Server Error") 
+        });
     }
 });
 
@@ -92,7 +98,13 @@ router.post('/login', async (req, res) => {
         });
     } catch (error) {
         console.error("Error in /login:", error);
-        res.status(500).json({ success: false, message: "Internal Server Error" });
+        const isDbError = error.name === 'MongooseError' || error.message?.includes('buffering timed out') || error.message?.includes('ECONNREFUSED');
+        res.status(500).json({ 
+            success: false, 
+            message: isDbError 
+                ? "Database unavailable: MongoDB Atlas connection is currently pending or blocked by IP whitelist." 
+                : (error.message || "Internal Server Error") 
+        });
     }
 });
 

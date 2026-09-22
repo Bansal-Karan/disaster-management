@@ -8,6 +8,7 @@ import userRoutes from "./routes/auth.js"
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import cookieParser from "cookie-parser"
 
+import mongoose from "mongoose";
 import broadcastRoutes from "./routes/broadcastRoutes.js";
 
 dotenv.config();
@@ -36,6 +37,24 @@ app.use("/api/broadcasts", broadcastRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ status: "online", message: "AapdaMitra API is running live" });
+});
+
+app.get("/api/db-status", (req, res) => {
+  const state = mongoose.connection.readyState;
+  const states = {
+    0: "disconnected",
+    1: "connected",
+    2: "connecting",
+    3: "disconnecting",
+  };
+  res.status(200).json({
+    databaseStatus: states[state] || "unknown",
+    readyState: state,
+    hasMongoUri: !!process.env.MONGO_URI,
+    mongoUriConfigured: process.env.MONGO_URI
+      ? `${process.env.MONGO_URI.substring(0, 14)}...`
+      : "NONE",
+  });
 });
 
 const PORT = process.env.PORT || 5000;
