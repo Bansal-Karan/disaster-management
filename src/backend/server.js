@@ -34,5 +34,9 @@ app.use("/api/safezones", safeZoneRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/broadcasts", broadcastRoutes);
 
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "online", message: "AapdaMitra API is running live" });
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
