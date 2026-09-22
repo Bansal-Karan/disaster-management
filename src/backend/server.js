@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import sosRoutes from "./routes/sosRoutes.js";
 import cors from "cors";
-import mongoDb from "./config/db.js";
+import mongoDb, { getDbError } from "./config/db.js";
 import safeZoneRoutes from "./routes/safeZoneRoutes.js"
 import userRoutes from "./routes/auth.js"
 import { authMiddleware } from "./middleware/authMiddleware.js";
@@ -39,7 +39,15 @@ app.get("/", (req, res) => {
   res.status(200).json({ status: "online", message: "AapdaMitra API is running live" });
 });
 
-app.get("/api/db-status", (req, res) => {
+app.get("/api/db-status", async (req, res) => {
+  if (mongoose.connection.readyState === 0 && process.env.MONGO_URI) {
+    try {
+      await mongoDb();
+    } catch (e) {
+      console.warn("Reconnect triggered by status check failed:", e.message);
+    }
+  }
+
   const state = mongoose.connection.readyState;
   const states = {
     0: "disconnected",
@@ -54,6 +62,7 @@ app.get("/api/db-status", (req, res) => {
     mongoUriConfigured: process.env.MONGO_URI
       ? `${process.env.MONGO_URI.substring(0, 14)}...`
       : "NONE",
+    errorMessage: getDbError() || (state === 1 ? null : "Connecting or waiting for response"),
   });
 });
 
