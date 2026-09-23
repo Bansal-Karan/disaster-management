@@ -103,7 +103,7 @@ const NewsSection = () => {
         if (rawArticles.length > 0) {
           const formatted = rawArticles.slice(0, 12).map((a) => {
             const text = `${a.title || ""} ${a.description || ""}`.toLowerCase();
-            
+
             let category = "Advisories";
             if (text.includes("flood") || text.includes("inundat") || text.includes("rain") || text.includes("monsoon") || text.includes("waterlogg") || text.includes("deluge")) {
               category = "Floods";
@@ -156,13 +156,13 @@ const NewsSection = () => {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = activeCategory === "All" 
-    ? articles 
-    : articles.filter(a => 
-        a.category?.toLowerCase() === activeCategory.toLowerCase() || 
-        a.title.toLowerCase().includes(activeCategory.toLowerCase()) ||
-        (a.description && a.description.toLowerCase().includes(activeCategory.toLowerCase()))
-      );
+  const filtered = activeCategory === "All"
+    ? articles
+    : articles.filter(a =>
+      a.category?.toLowerCase() === activeCategory.toLowerCase() ||
+      a.title.toLowerCase().includes(activeCategory.toLowerCase()) ||
+      (a.description && a.description.toLowerCase().includes(activeCategory.toLowerCase()))
+    );
 
   const getSeverityBadge = (severity) => {
     switch (severity) {
@@ -183,33 +183,32 @@ const NewsSection = () => {
 
   return (
     <div className="w-full space-y-8 text-left">
-      
+
       {/* Header with Title & Filter Pills */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
+        <div className="max-w-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold mb-2">
             <span className="text-sm">🇮🇳</span>
             <span>Indian Disaster & Weather Watch</span>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
             Live Crisis & Disaster Alerts (India)
           </h2>
-          <p className="text-sm text-slate-600 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
             Real-time warnings, IMD meteorological bulletins, and NDRF relief operations across Indian states.
           </p>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex overflow-x-auto no-scrollbar gap-2 pb-1 sm:flex-wrap shrink-0">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                activeCategory === cat
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${activeCategory === cat
                   ? "bg-indigo-600 text-white shadow-xs border border-indigo-600"
                   : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-xs"
-              }`}
+                }`}
             >
               {cat}
             </button>
@@ -261,7 +260,7 @@ const NewsSection = () => {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent"></div>
-                
+
                 <div className="absolute top-3 left-3 flex gap-2 items-center">
                   {getSeverityBadge(article.severity)}
                 </div>

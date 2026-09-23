@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import Logo from '../assets/logo.png';
-import { FaBars, FaTimes, FaExclamationTriangle, FaSignOutAlt, FaUserCircle } from 'react-icons/fa';
+import { FaBars, FaTimes, FaExclamationTriangle, FaSignOutAlt, FaUserCircle, FaLock } from 'react-icons/fa';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -65,29 +65,29 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20 gap-4">
+        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
           
           {/* Brand Logo */}
-          <NavLink to="/" className="flex items-center gap-2.5 sm:gap-3 group shrink-0">
-            <div className="relative">
+          <NavLink to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0">
+            <div className="relative shrink-0">
               <img 
                 src={Logo} 
                 alt="AapdaMitra Logo" 
-                className="w-10 h-10 sm:w-11 sm:h-11 object-contain rounded-xl p-1 bg-indigo-50 border border-indigo-100 shadow-xs group-hover:scale-105 transition-transform duration-200" 
+                className="w-9 h-9 sm:w-11 sm:h-11 object-contain rounded-xl p-1 bg-indigo-50 border border-indigo-100 shadow-xs group-hover:scale-105 transition-transform duration-200" 
               />
-              <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-2.5 w-2.5 sm:h-3 sm:w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 border-2 border-white"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-emerald-500 border-2 border-white"></span>
               </span>
             </div>
-            <div className="leading-tight">
+            <div className="leading-tight min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 font-['Outfit'] group-hover:text-indigo-600 transition-colors">
+                <span className="text-lg sm:text-2xl font-extrabold tracking-tight text-slate-900 font-['Outfit'] group-hover:text-indigo-600 transition-colors">
                   AapdaMitra
                 </span>
-                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">
+                <span className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200 shrink-0">
                   Live
                 </span>
               </div>
@@ -111,7 +111,12 @@ const Navbar = () => {
                   }`
                 }
               >
-                <span>{name}</span>
+                <span className="flex items-center gap-1.5">
+                  <span>{name}</span>
+                  {!token && path !== '/' && (
+                    <FaLock className="text-[10px] text-slate-400 group-hover:text-slate-600" title="Sign in required to access" />
+                  )}
+                </span>
                 {badge && (
                   <span className={`text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded border ${
                     role === 'admin'
@@ -182,20 +187,20 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Menu Toggle */}
-          <div className="flex lg:hidden items-center gap-2">
+          <div className="flex lg:hidden items-center gap-1.5 sm:gap-2 shrink-0">
             <NavLink
               to="/sosrequests"
-              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-md animate-emergency-pulse text-xs font-bold flex items-center gap-1"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white shadow-md animate-emergency-pulse text-xs font-bold flex items-center gap-1 shrink-0"
             >
               <FaExclamationTriangle className="text-amber-200 text-xs" />
               <span>SOS</span>
             </NavLink>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900"
+              className="p-2 sm:p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-900 shrink-0"
               aria-label="Toggle menu"
             >
-              {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
+              {mobileMenuOpen ? <FaTimes size={18} /> : <FaBars size={18} />}
             </button>
           </div>
 
@@ -218,7 +223,12 @@ const Navbar = () => {
                 }`
               }
             >
-              <span>{name}</span>
+              <span className="flex items-center gap-1.5">
+                <span>{name}</span>
+                {!token && path !== '/' && (
+                  <FaLock className="text-[11px] text-slate-400" title="Sign in required to access" />
+                )}
+              </span>
               {badge && (
                 <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border ${
                   role === 'admin'

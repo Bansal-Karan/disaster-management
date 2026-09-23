@@ -1,16 +1,24 @@
 import React, { useState } from "react";
 import { FaUser, FaLock, FaIdBadge, FaEye, FaEyeSlash, FaShieldAlt, FaSpinner, FaHandsHelping, FaCheckCircle } from "react-icons/fa";
 import Logo from "../assets/logo.png";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import toast from "react-hot-toast";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isRegister, setIsRegister] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
   const [form, setForm] = useState({
     name: "",
     username: "",
@@ -67,7 +75,11 @@ export default function AuthPage() {
             localStorage.setItem("user", JSON.stringify(data.user));
           }
 
-          if (data.user?.role === "admin" || data.user?.role === "volunteer") {
+          const returnTo = location.state?.from?.pathname;
+          if (returnTo && returnTo !== "/login") {
+            toast.success(`Welcome back, ${data.user?.name || "User"}!`);
+            navigate(returnTo);
+          } else if (data.user?.role === "admin" || data.user?.role === "volunteer") {
             toast.success(`Welcome back, ${data.user?.name || "Responder"}!`);
             navigate("/dashboard");
           } else {

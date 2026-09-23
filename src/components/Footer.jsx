@@ -11,7 +11,7 @@ const emergencyNumbers = [
 
 const Footer = () => {
   return (
-    <footer className="mt-auto bg-[#0a1128] border-t border-slate-200 text-slate-300 text-left">
+    <footer className="mt-auto bg-[#0a1128] border-t border-slate-200 text-slate-300 text-left w-full">
       {/* Emergency Hotlines Strip */}
       <div className="bg-[#0f172a] border-b border-white/10 py-4 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">

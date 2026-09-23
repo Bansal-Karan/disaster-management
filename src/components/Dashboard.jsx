@@ -119,10 +119,20 @@ export default function Dashboard() {
     }
   };
 
+  const getAuthHeaders = () => {
+    const t = localStorage.getItem("token");
+    return {
+      "Content-Type": "application/json",
+      ...(t ? { Authorization: `Bearer ${t}` } : {}),
+    };
+  };
+
   const fetchIncidents = async () => {
     setLoadingIncidents(true);
     try {
-      const res = await fetch(`${API_URL}/api/sos`);
+      const res = await fetch(`${API_URL}/api/sos`, {
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
       if (Array.isArray(data)) {
         setIncidents(data);
@@ -206,7 +216,9 @@ export default function Dashboard() {
 
   const fetchSafeZones = async () => {
     try {
-      const res = await fetch(`${API_URL}/api/safeZones`);
+      const res = await fetch(`${API_URL}/api/safeZones`, {
+        headers: getAuthHeaders(),
+      });
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         setSafeZones(data);
@@ -224,7 +236,7 @@ export default function Dashboard() {
     try {
       const res = await fetch(`${API_URL}/api/sos/${id}/status`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify({
           status: newStatus,
           assignedTo: assignedVolunteer || currentUser?.name || "Responder",
@@ -278,7 +290,10 @@ export default function Dashboard() {
   // Delete incident
   const handleDeleteIncident = async (id) => {
     try {
-      await fetch(`${API_URL}/api/sos/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/sos/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       setIncidents((prev) => prev.filter((i) => i._id !== id));
       toast.success("Incident record removed");
     } catch {
@@ -295,7 +310,7 @@ export default function Dashboard() {
     try {
       const res = await fetch(`${API_URL}/api/safeZones`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(newZone),
       });
 
@@ -324,7 +339,10 @@ export default function Dashboard() {
   // Delete Safe Zone
   const handleDeleteZone = async (id) => {
     try {
-      await fetch(`${API_URL}/api/safeZones/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/safeZones/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       setSafeZones((prev) => prev.filter((z) => z._id !== id));
       toast.success("Safe zone removed");
     } catch {
@@ -347,7 +365,7 @@ export default function Dashboard() {
     try {
       const res = await fetch(`${API_URL}/api/broadcasts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
       });
 
@@ -381,7 +399,10 @@ export default function Dashboard() {
   // Delete Broadcast early
   const handleDeleteBroadcast = async (id) => {
     try {
-      await fetch(`${API_URL}/api/broadcasts/${id}`, { method: "DELETE" });
+      await fetch(`${API_URL}/api/broadcasts/${id}`, {
+        method: "DELETE",
+        headers: getAuthHeaders(),
+      });
       setBroadcasts((prev) => prev.filter((b) => (b._id || b.id) !== id));
       toast.success("Broadcast advisory withdrawn");
     } catch {
@@ -570,14 +591,14 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 text-left">
+    <div className="w-full min-h-screen pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8 text-left">
       
       {/* 1. Header Banner & Identity */}
-      <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6 bg-white">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className={`text-xs uppercase font-extrabold px-3 py-1 rounded-full border ${
+      <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-4 sm:gap-6 bg-white">
+        <div className="space-y-2 max-w-2xl">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+            <span className={`text-[10px] sm:text-xs uppercase font-extrabold px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full border ${
               isAdmin
                 ? "bg-rose-50 text-rose-700 border-rose-200"
                 : isVolunteer
@@ -588,23 +609,23 @@ export default function Dashboard() {
             </span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
             {isAdmin ? "Admin Control Center" : "Volunteer Task Portal"}
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600">
+          <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             Welcome, <span className="font-bold text-slate-900">{currentUser?.name || currentUser?.username}</span>. Live coordination for disaster beacons, safe shelters, and volunteer field missions.
           </p>
         </div>
 
         {/* Action Button & Role Preview for Admins */}
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
           {currentUser?.role === "admin" && (
-            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs">
-              <span className="text-[10px] uppercase font-bold text-slate-600 px-2">Preview Role:</span>
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs justify-between sm:justify-start">
+              <span className="text-[10px] uppercase font-bold text-slate-600 px-1.5 sm:px-2">Role:</span>
               <button
                 onClick={() => setActiveRoleOverride("admin")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                   isAdmin
                     ? "bg-rose-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -615,7 +636,7 @@ export default function Dashboard() {
               </button>
               <button
                 onClick={() => setActiveRoleOverride("volunteer")}
-                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                className={`flex-1 sm:flex-none px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
                   isVolunteer
                     ? "bg-emerald-600 text-white shadow-xs"
                     : "text-slate-600 hover:text-slate-900"
@@ -630,7 +651,7 @@ export default function Dashboard() {
           {isAdmin && (
             <button
               onClick={() => setShowAddZoneModal(true)}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-100 transition-all hover:scale-105"
+              className="flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 sm:py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-100 transition-all hover:scale-[1.02]"
             >
               <FaPlus />
               <span>Add Safe Shelter</span>
@@ -640,72 +661,72 @@ export default function Dashboard() {
       </div>
 
       {/* 2. Top Analytics Metrics Strip */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>Pending Incidents</span>
-            <FaExclamationTriangle className="text-rose-600" />
+            <span className="truncate pr-1">Pending</span>
+            <FaExclamationTriangle className="text-rose-600 shrink-0" />
           </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {incidents.filter((i) => i.status === "Pending").length}
           </div>
-          <div className="text-[11px] text-rose-700 font-semibold">Immediate response required</div>
+          <div className="text-[10px] sm:text-[11px] text-rose-700 font-semibold truncate">Immediate response</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>Missions In Progress</span>
-            <FaHandsHelping className="text-amber-600" />
+            <span className="truncate pr-1">In Progress</span>
+            <FaHandsHelping className="text-amber-600 shrink-0" />
           </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {incidents.filter((i) => i.status === "In Progress").length}
           </div>
-          <div className="text-[11px] text-amber-700 font-semibold">Responders actively deployed</div>
+          <div className="text-[10px] sm:text-[11px] text-amber-700 font-semibold truncate">Responders deployed</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>Resolved Rescues</span>
-            <FaCheckCircle className="text-emerald-600" />
+            <span className="truncate pr-1">Resolved</span>
+            <FaCheckCircle className="text-emerald-600 shrink-0" />
           </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {incidents.filter((i) => i.status === "Resolved").length}
           </div>
-          <div className="text-[11px] text-emerald-700 font-semibold">Victims relocated to safety</div>
+          <div className="text-[10px] sm:text-[11px] text-emerald-700 font-semibold truncate">Relocated to safety</div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+        <div className="bg-white p-3.5 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-1">
           <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>Operational Shelters</span>
-            <FaHospital className="text-indigo-600" />
+            <span className="truncate pr-1">Shelters</span>
+            <FaHospital className="text-indigo-600 shrink-0" />
           </div>
-          <div className="text-3xl font-extrabold text-slate-900 font-['Outfit']">
+          <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 font-['Outfit']">
             {safeZones.length || 5}
           </div>
-          <div className="text-[11px] text-indigo-700 font-semibold">Live GPS tracked facilities</div>
+          <div className="text-[10px] sm:text-[11px] text-indigo-700 font-semibold truncate">Live GPS tracked</div>
         </div>
       </div>
 
       {/* 3. Navigation Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
+      <div className="w-full flex overflow-x-auto no-scrollbar gap-2 border-b border-slate-200 pb-3 pt-1">
         {[
-          { id: "incidents", label: "🚨 Emergency Incident Feed", count: incidents.length },
-          { id: "shelters", label: "🏥 Safe Shelters Registry", count: safeZones.length || 5 },
-          { id: "broadcast", label: "📢 Emergency Bulletins", count: broadcasts.length },
-          { id: "roster", label: "🛡️ Responder Guidelines", count: null },
+          { id: "incidents", label: "🚨 Incident Feed", count: incidents.length },
+          { id: "shelters", label: "🏥 Safe Shelters", count: safeZones.length || 5 },
+          { id: "broadcast", label: "📢 Bulletins", count: broadcasts.length },
+          { id: "roster", label: "🛡️ Protocols", count: null },
         ].map(({ id, label, count }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap shrink-0 transition-all ${
               activeTab === id
-                ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-600 scale-105"
+                ? "bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-600"
                 : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-xs"
             }`}
           >
             <span>{label}</span>
             {count !== null && (
-              <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
+              <span className={`px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] font-mono ${
                 activeTab === id ? "bg-white/20 text-white" : "bg-slate-100 text-slate-700"
               }`}>
                 {count}
@@ -830,31 +851,31 @@ export default function Dashboard() {
                       </div>
 
                       {/* Right: Operational Action Buttons */}
-                      <div className="flex flex-wrap lg:flex-col gap-2 w-full lg:w-auto shrink-0">
+                      <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-48 shrink-0">
                         {isPending && (
                           <button
                             onClick={() => handleUpdateStatus(incident._id, "In Progress")}
-                            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition-all"
                           >
                             <FaHandsHelping />
-                            <span>Claim Mission (En Route)</span>
+                            <span>Claim Mission</span>
                           </button>
                         )}
 
                         {isInProgress && (
                           <button
                             onClick={() => handleUpdateStatus(incident._id, "Resolved")}
-                            className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all"
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all"
                           >
                             <FaCheckCircle />
-                            <span>Mark Mission Resolved</span>
+                            <span>Mark Resolved</span>
                           </button>
                         )}
 
                         {isResolved && (
                           <button
                             onClick={() => handleUpdateStatus(incident._id, "Pending")}
-                            className="flex items-center justify-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition-all border border-slate-200 font-semibold"
+                            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs transition-all border border-slate-200 font-semibold"
                           >
                             Re-Open Incident
                           </button>
@@ -863,11 +884,11 @@ export default function Dashboard() {
                         {isAdmin && (
                           <button
                             onClick={() => handleDeleteIncident(incident._id)}
-                            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs transition-all font-semibold"
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs transition-all font-semibold"
                             title="Delete Record"
                           >
                             <FaTrash className="text-[10px]" />
-                            <span>Remove</span>
+                            <span>Remove Record</span>
                           </button>
                         )}
                       </div>
@@ -1138,21 +1159,21 @@ export default function Dashboard() {
 
       {/* 8. Add Safe Zone Modal (Admin only) */}
       {showAddZoneModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="glass-panel p-6 sm:p-8 rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl space-y-5 bg-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200 overflow-y-auto">
+          <div className="glass-panel p-5 sm:p-8 rounded-2xl sm:rounded-3xl max-w-lg w-full border border-slate-200 shadow-2xl space-y-4 sm:space-y-5 bg-white my-auto max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900 font-['Outfit']">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 font-['Outfit']">
                 Register New Safe Zone
               </h3>
               <button
                 onClick={() => setShowAddZoneModal(false)}
-                className="text-slate-400 hover:text-slate-700 text-sm"
+                className="text-slate-400 hover:text-slate-700 text-sm p-1 rounded-lg hover:bg-slate-100"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateZone} className="space-y-4 text-left">
+            <form onSubmit={handleCreateZone} className="space-y-3.5 sm:space-y-4 text-left">
               <div>
                 <label className="block text-xs font-semibold text-slate-700 mb-1">Facility Name *</label>
                 <input
@@ -1165,7 +1186,7 @@ export default function Dashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Shelter Type</label>
                   <select
@@ -1205,7 +1226,7 @@ export default function Dashboard() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">Latitude</label>
                   <input

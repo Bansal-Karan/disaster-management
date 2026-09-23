@@ -3,12 +3,13 @@ import express from "express";
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import SOS from "../models/sosModel.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 dotenv.config();
 const router = express.Router();
 
-// 1. Submit SOS Beacon (Records in DB and attempts Email alert)
-router.post("/", async (req, res) => {
+// 1. Submit SOS Beacon (Secured - only logged in users can dispatch SOS)
+router.post("/", authMiddleware, async (req, res) => {
     const { name, email, phone, location, message } = req.body;
 
     try {
@@ -62,8 +63,8 @@ router.post("/", async (req, res) => {
     }
 });
 
-// 2. Fetch all SOS Requests (For Admin & Volunteer Dashboard)
-router.get("/", async (req, res) => {
+// 2. Fetch all SOS Requests (Secured - For Admin & Volunteer Dashboard)
+router.get("/", authMiddleware, async (req, res) => {
     try {
         const incidents = await SOS.find().sort({ createdAt: -1 });
         res.json(incidents);
@@ -73,8 +74,8 @@ router.get("/", async (req, res) => {
     }
 });
 
-// 3. Update SOS Status / Claim Mission (For Volunteers & Admins)
-router.patch("/:id/status", async (req, res) => {
+// 3. Update SOS Status / Claim Mission (Secured - For Volunteers & Admins)
+router.patch("/:id/status", authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         const { status, assignedTo } = req.body;
@@ -99,8 +100,8 @@ router.patch("/:id/status", async (req, res) => {
     }
 });
 
-// 4. Delete SOS Request (For Admins to clear resolved/test records)
-router.delete("/:id", async (req, res) => {
+// 4. Delete SOS Request (Secured - For Admins to clear resolved/test records)
+router.delete("/:id", authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
         await SOS.findByIdAndDelete(id);

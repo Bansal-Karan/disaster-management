@@ -1,10 +1,11 @@
 import express from "express";
 import SafeZone from "../models/safeZoneModel.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// Get all safe zones
-router.get("/", async (req, res) => {
+// Get all safe zones (Secured - logged in users only)
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const zones = await SafeZone.find();
     res.json(zones);
@@ -13,8 +14,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Create new safe zone (Admin privilege)
-router.post("/", async (req, res) => {
+// Create new safe zone (Secured)
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const { name, type, address, latitude, longitude, capacity, contact } = req.body;
     
@@ -39,8 +40,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Delete safe zone (Admin privilege)
-router.delete("/:id", async (req, res) => {
+// Delete safe zone (Secured)
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     await SafeZone.findByIdAndDelete(id);

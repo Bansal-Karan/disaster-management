@@ -1,9 +1,10 @@
 import express from "express";
 import Broadcast from "../models/broadcastModel.js";
+import { authMiddleware } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// 1. Fetch active broadcasts (within 24-hour window)
+// 1. Fetch active broadcasts (Public within 24-hour window for Home page emergency banner)
 router.get("/", async (req, res) => {
   try {
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -22,8 +23,8 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 2. Post new broadcast (Admin privilege, 24-hour auto-expiry)
-router.post("/", async (req, res) => {
+// 2. Post new broadcast (Secured)
+router.post("/", authMiddleware, async (req, res) => {
   try {
     const { title, message, severity, author } = req.body;
     if (!title || !title.trim()) {
@@ -49,8 +50,8 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 3. Delete broadcast early (Admin option)
-router.delete("/:id", async (req, res) => {
+// 3. Delete broadcast early (Secured)
+router.delete("/:id", authMiddleware, async (req, res) => {
   try {
     const { id } = req.params;
     await Broadcast.findByIdAndDelete(id);

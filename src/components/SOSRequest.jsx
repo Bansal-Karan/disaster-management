@@ -83,9 +83,13 @@ export default function SOSRequest() {
     };
 
     try {
+      const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/api/sos`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify(payload),
       });
 
@@ -118,21 +122,21 @@ export default function SOSRequest() {
   };
 
   return (
-    <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+    <div className="w-full min-h-screen pt-24 sm:pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 sm:space-y-8">
       
       {/* Top Advisory */}
-      <div className="mb-8 p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-900 text-xs sm:text-sm shadow-xs">
-        <div className="flex items-center gap-3 font-semibold text-left">
-          <FaExclamationTriangle className="text-rose-600 text-lg shrink-0 animate-bounce" />
-          <span>If you are in immediate life-threatening danger, dial 112 or 108 directly on your mobile device.</span>
+      <div className="p-3.5 sm:p-4 rounded-2xl bg-rose-50 border border-rose-200 flex items-center justify-between text-rose-900 text-xs sm:text-sm shadow-xs">
+        <div className="flex items-center gap-2.5 sm:gap-3 font-semibold text-left">
+          <FaExclamationTriangle className="text-rose-600 text-base sm:text-lg shrink-0 animate-bounce" />
+          <span className="leading-snug">If you are in immediate life-threatening danger, dial 112 or 108 directly on your mobile device.</span>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
+      <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         {/* Left Form: Emergency Console */}
         <div className="lg:col-span-8">
-          <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-md relative overflow-hidden bg-white">
+          <div className="glass-panel p-4 sm:p-7 md:p-10 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-md relative overflow-hidden bg-white">
             
             <div className="flex items-center justify-between pb-6 mb-6 border-b border-slate-100">
               <div className="text-left">
@@ -311,7 +315,7 @@ export default function SOSRequest() {
 
                   {/* Location with One-Click GPS */}
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 mb-1.5">
                       <label className="text-xs font-semibold text-slate-700">
                         Incident Location / Landmark *
                       </label>
@@ -319,7 +323,7 @@ export default function SOSRequest() {
                         type="button"
                         onClick={handleDetectLocation}
                         disabled={locating}
-                        className="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200 transition-all shadow-xs"
+                        className="text-[11px] font-bold text-indigo-700 hover:text-indigo-900 flex items-center gap-1 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-200 transition-all shadow-xs shrink-0"
                       >
                         {locating ? (
                           <>
@@ -367,17 +371,17 @@ export default function SOSRequest() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full flex items-center justify-center gap-3 py-4 rounded-xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-extrabold text-base shadow-lg shadow-rose-200 transition-all animate-emergency-pulse disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2.5 sm:gap-3 px-4 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl bg-gradient-to-r from-rose-600 via-red-600 to-rose-700 hover:from-rose-500 hover:to-red-500 text-white font-extrabold text-sm sm:text-base shadow-lg shadow-rose-200 transition-all animate-emergency-pulse disabled:opacity-50 text-center"
                 >
                   {submitting ? (
                     <>
-                      <FaSpinner className="animate-spin text-lg" />
-                      <span>Broadcasting SOS Signal...</span>
+                      <FaSpinner className="animate-spin text-base sm:text-lg shrink-0" />
+                      <span className="truncate">Broadcasting SOS Signal...</span>
                     </>
                   ) : (
                     <>
-                      <FaExclamationTriangle className="text-amber-200 text-lg" />
-                      <span>DISPATCH IMMEDIATE SOS BEACON</span>
+                      <FaExclamationTriangle className="text-amber-300 text-base sm:text-lg shrink-0" />
+                      <span className="tracking-wide uppercase whitespace-nowrap">DISPATCH EMERGENCY SOS</span>
                     </>
                   )}
                 </button>
@@ -392,7 +396,7 @@ export default function SOSRequest() {
         <div className="lg:col-span-4 space-y-6">
           
           {/* Quick Dial Card */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 bg-white shadow-xs text-left">
+          <div className="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-200 space-y-4 bg-white shadow-xs text-left">
             <h3 className="font-bold text-slate-900 text-base font-['Outfit'] flex items-center gap-2">
               <FaPhoneAlt className="text-rose-600" /> Direct Emergency Lines
             </h3>
@@ -410,20 +414,20 @@ export default function SOSRequest() {
                 <a
                   key={number}
                   href={`tel:${number}`}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all group shadow-xs"
+                  className="flex items-center justify-between gap-2.5 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 transition-all group shadow-xs"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-rose-100 text-rose-700 border border-rose-200">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className="p-2 rounded-xl bg-rose-100 text-rose-700 border border-rose-200 shrink-0">
                       <Icon className="text-sm" />
                     </div>
-                    <div className="text-left">
-                      <div className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                    <div className="text-left min-w-0">
+                      <div className="text-xs font-bold text-slate-900 group-hover:text-indigo-600 transition-colors truncate">
                         {title}
                       </div>
-                      <div className="text-[10px] text-slate-500">{desc}</div>
+                      <div className="text-[10px] text-slate-500 truncate">{desc}</div>
                     </div>
                   </div>
-                  <span className="text-sm font-extrabold text-slate-900 font-mono px-2.5 py-1 rounded-lg bg-white border border-slate-200 group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-colors">
+                  <span className="text-xs sm:text-sm font-extrabold text-slate-900 font-mono px-2.5 py-1 rounded-lg bg-white border border-slate-200 group-hover:bg-rose-600 group-hover:text-white group-hover:border-rose-600 transition-colors shrink-0">
                     {number}
                   </span>
                 </a>

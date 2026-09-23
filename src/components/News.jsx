@@ -35,7 +35,7 @@ const News = () => {
   };
 
   return (
-    <div className="flex flex-col w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 text-left">
+    <div className="w-full min-h-screen pt-28 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-8 text-left">
       
       {/* High-Priority Public Safety Directives Section */}
       {broadcasts.length > 0 ? (

@@ -194,57 +194,78 @@ const Home = () => {
             </p>
 
             {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 pt-2">
               <NavLink
                 to="/sosrequests"
-                className="flex items-center justify-center gap-3 px-7 py-3.5 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-base shadow-lg shadow-rose-200 hover:scale-[1.02] transition-all animate-emergency-pulse"
+                className="flex items-center justify-center gap-2.5 sm:gap-3 px-5 sm:px-7 py-3 sm:py-3.5 rounded-xl bg-gradient-to-r from-rose-600 via-rose-500 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-rose-200 hover:scale-[1.02] transition-all animate-emergency-pulse text-center"
               >
-                <FaExclamationTriangle className="text-amber-200" />
+                <FaExclamationTriangle className="text-amber-200 shrink-0" />
                 <span>Send Emergency SOS</span>
               </NavLink>
 
               <NavLink
                 to="/safezones"
-                className="flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-base shadow-xs hover:scale-[1.02] transition-all"
+                className="flex items-center justify-center gap-2 sm:gap-2.5 px-5 sm:px-6 py-3 sm:py-3.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 font-semibold text-sm sm:text-base shadow-xs hover:scale-[1.02] transition-all text-center"
               >
-                <FaMapMarkedAlt className="text-emerald-600" />
+                <FaMapMarkedAlt className="text-emerald-600 shrink-0" />
                 <span>Find Safe Shelters</span>
               </NavLink>
             </div>
 
             {/* Quick Helpline Strip */}
-            <div className="pt-4 flex items-center gap-4 text-xs text-slate-500">
-              <span className="font-semibold text-slate-700">Quick Helplines:</span>
-              <a href="tel:112" className="text-rose-600 hover:text-rose-700 font-bold underline">112 (National)</a>
-              <span>•</span>
-              <a href="tel:108" className="text-rose-600 hover:text-rose-700 font-bold underline">108 (Ambulance)</a>
-              <span>•</span>
-              <a href="tel:1078" className="text-rose-600 hover:text-rose-700 font-bold underline">1078 (Disaster)</a>
+            <div className="pt-3 sm:pt-4 space-y-2 text-left">
+              <span className="text-[11px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 block">
+                Emergency Helplines (Toll-Free):
+              </span>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-xs">
+                <a
+                  href="tel:112"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold shadow-xs whitespace-nowrap transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-rose-600 animate-pulse"></span>
+                  <span>112</span>
+                  <span className="text-[11px] font-normal text-rose-600/80">(National)</span>
+                </a>
+                <a
+                  href="tel:108"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold shadow-xs whitespace-nowrap transition-colors"
+                >
+                  <span>108</span>
+                  <span className="text-[11px] font-normal text-rose-600/80">(Ambulance)</span>
+                </a>
+                <a
+                  href="tel:1078"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold shadow-xs whitespace-nowrap transition-colors"
+                >
+                  <span>1078</span>
+                  <span className="text-[11px] font-normal text-rose-600/80">(Disaster)</span>
+                </a>
+              </div>
             </div>
 
           </div>
 
           {/* Right Hero Column: Interactive Card Display */}
-          <div className="lg:col-span-5 flex justify-center">
+          <div className="lg:col-span-5 flex justify-center w-full">
             <div className="relative w-full max-w-md">
-              <div className="glass-panel p-6 sm:p-8 rounded-3xl relative z-10 border border-slate-200 shadow-md space-y-6 bg-white">
+              <div className="glass-panel p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-3xl relative z-10 border border-slate-200 shadow-md space-y-4 sm:space-y-6 bg-white">
                 
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-100 gap-2">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                     <img 
                       src={Logo} 
                       alt="AapdaMitra Shield" 
-                      className="w-14 h-14 object-contain rounded-2xl bg-indigo-50 p-2 border border-indigo-100 shadow-xs" 
+                      className="w-11 h-11 sm:w-14 sm:h-14 object-contain rounded-xl sm:rounded-2xl bg-indigo-50 p-1.5 sm:p-2 border border-indigo-100 shadow-xs shrink-0" 
                     />
-                    <div>
-                      <h3 className="font-bold text-slate-900 text-lg font-['Outfit']">AapdaMitra Command</h3>
-                      <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-slate-900 text-base sm:text-lg font-['Outfit'] truncate">AapdaMitra Command</h3>
+                      <p className="text-[11px] sm:text-xs text-emerald-600 font-semibold flex items-center gap-1.5 truncate">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                         Emergency Network Active
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
+                  <span className="text-[11px] sm:text-xs px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold whitespace-nowrap shrink-0">
                     v2.0 Live
                   </span>
                 </div>
@@ -253,61 +274,61 @@ const Home = () => {
                 <div className="space-y-3">
                   <NavLink
                     to="/safezones"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200/80 transition-all group"
+                    className="flex items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-slate-50 hover:bg-emerald-50/50 border border-slate-200/80 transition-all group"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                      <div className="p-2 sm:p-2.5 rounded-lg bg-emerald-100 text-emerald-700 border border-emerald-200 shrink-0">
                         <FaHospital />
                       </div>
-                      <div className="text-left">
-                        <div className="text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                      <div className="text-left min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors truncate">
                           Safe Zones Map
                         </div>
-                        <div className="text-xs text-slate-500">Locate open shelters & medical units</div>
+                        <div className="text-[11px] sm:text-xs text-slate-500 truncate">Locate open shelters & medical units</div>
                       </div>
                     </div>
-                    <FaArrowRight className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all text-xs" />
+                    <FaArrowRight className="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all text-xs shrink-0" />
                   </NavLink>
 
                   <NavLink
                     to="/news"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/80 transition-all group"
+                    className="flex items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/80 transition-all group"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                      <div className="p-2 sm:p-2.5 rounded-lg bg-indigo-100 text-indigo-700 border border-indigo-200 shrink-0">
                         <FaShieldAlt />
                       </div>
-                      <div className="text-left">
-                        <div className="text-sm font-semibold text-slate-900 group-hover:text-indigo-700 transition-colors">
+                      <div className="text-left min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-indigo-700 transition-colors truncate">
                           Disaster Bulletins
                         </div>
-                        <div className="text-xs text-slate-500">Live verified updates & warnings</div>
+                        <div className="text-[11px] sm:text-xs text-slate-500 truncate">Live verified updates & warnings</div>
                       </div>
                     </div>
-                    <FaArrowRight className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all text-xs" />
+                    <FaArrowRight className="text-slate-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all text-xs shrink-0" />
                   </NavLink>
 
                   <NavLink
                     to="/sosrequests"
-                    className="flex items-center justify-between p-3.5 rounded-xl bg-rose-50 hover:bg-rose-100/70 border border-rose-200 transition-all group"
+                    className="flex items-center justify-between gap-2 p-3 sm:p-3.5 rounded-xl bg-rose-50 hover:bg-rose-100/70 border border-rose-200 transition-all group"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-200">
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                      <div className="p-2 sm:p-2.5 rounded-lg bg-rose-100 text-rose-700 border border-rose-200 shrink-0">
                         <FaExclamationTriangle />
                       </div>
-                      <div className="text-left">
-                        <div className="text-sm font-semibold text-rose-900 group-hover:text-rose-950 transition-colors">
+                      <div className="text-left min-w-0">
+                        <div className="text-xs sm:text-sm font-semibold text-rose-900 group-hover:text-rose-950 transition-colors truncate">
                           Dispatch SOS Alert
                         </div>
-                        <div className="text-xs text-rose-700/80">Broadcast emergency coordinates</div>
+                        <div className="text-[11px] sm:text-xs text-rose-700/80 truncate">Broadcast emergency coordinates</div>
                       </div>
                     </div>
-                    <FaArrowRight className="text-rose-500 group-hover:translate-x-1 transition-all text-xs" />
+                    <FaArrowRight className="text-rose-500 group-hover:translate-x-1 transition-all text-xs shrink-0" />
                   </NavLink>
                 </div>
 
                 <div className="pt-2 text-center">
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-slate-500 leading-snug block">
                     Trusted by community volunteers and civil defense organizations.
                   </span>
                 </div>
@@ -320,11 +341,11 @@ const Home = () => {
       </section>
 
       {/* 2. Live Metrics Counter Strip */}
-      <section className="py-10 px-4 sm:px-6 lg:px-8 border-y border-slate-200 bg-white shadow-xs">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <section className="py-8 sm:py-10 px-4 sm:px-6 lg:px-8 border-y border-slate-200 bg-white shadow-xs">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 text-center">
           {stats.map(({ value, label, detail }) => (
-            <div key={label} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
-              <div className="text-3xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
+            <div key={label} className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
+              <div className="text-2xl sm:text-4xl font-extrabold text-slate-900 font-['Outfit'] tracking-tight">
                 {value}
               </div>
               <div className="text-xs sm:text-sm font-bold text-indigo-700">
@@ -339,21 +360,21 @@ const Home = () => {
       </section>
 
       {/* 3. Disaster Preparedness & Survival Protocols */}
-      <section className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
-        <div className="text-center space-y-3 mb-10">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="text-center space-y-3 mb-8 sm:mb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold">
             <FaHandsHelping /> Disaster Readiness Guide
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 font-['Outfit']">
+          <h2 className="text-2xl sm:text-4xl font-bold text-slate-900 font-['Outfit']">
             Emergency Preparedness Protocols
           </h2>
-          <p className="text-sm text-slate-600 max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-slate-600 max-w-2xl mx-auto">
             Review essential life-saving measures before, during, and after severe weather and geological hazards.
           </p>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-6 sm:mb-8">
           {Object.entries(preparednessGuides).map(([key, data]) => {
             const Icon = data.icon;
             const isSelected = activeGuide === key;
@@ -361,7 +382,7 @@ const Home = () => {
               <button
                 key={key}
                 onClick={() => setActiveGuide(key)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                   isSelected
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200 border border-indigo-600 scale-105'
                     : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs'

@@ -153,11 +153,18 @@ export default function SafeZones() {
   const [selectedCoords, setSelectedCoords] = useState(null);
 
   useEffect(() => {
-    fetch(`${API_URL}/api/safezones`)
+    const token = localStorage.getItem("token");
+    fetch(`${API_URL}/api/safezones`, {
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setZones(data.data);
+        } else if (Array.isArray(data) && data.length > 0) {
+          setZones(data);
         } else {
           setZones(defaultSafeZones);
         }
@@ -219,14 +226,14 @@ export default function SafeZones() {
       </div>
 
       {/* Category Pills */}
-      <div className="flex flex-wrap gap-2 pt-2">
+      <div className="w-full flex overflow-x-auto no-scrollbar gap-2 pt-2 pb-1 sm:flex-wrap">
         {categories.map((cat) => (
           <button
             key={cat}
             onClick={() => setSelectedCategory(cat)}
-            className={`px-4 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+            className={`px-3.5 sm:px-4 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all ${
               selectedCategory === cat
-                ? "bg-emerald-600 text-white shadow-xs border border-emerald-600 scale-105"
+                ? "bg-emerald-600 text-white shadow-xs border border-emerald-600"
                 : "bg-white text-slate-700 hover:bg-slate-50 border border-slate-200 shadow-xs"
             }`}
           >
@@ -236,12 +243,12 @@ export default function SafeZones() {
       </div>
 
       {/* Split View: Interactive Map + Cards */}
-      <div className="grid lg:grid-cols-12 gap-8 items-start">
+      <div className="grid lg:grid-cols-12 gap-6 lg:gap-8 items-start">
         
         {/* Interactive Leaflet Map */}
         <div className="lg:col-span-7">
-          <div className="glass-panel p-3 rounded-3xl border border-slate-200 overflow-hidden shadow-md bg-white">
-            <div className="rounded-2xl overflow-hidden relative z-0 h-[480px] border border-slate-100">
+          <div className="glass-panel p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl border border-slate-200 overflow-hidden shadow-md bg-white">
+            <div className="rounded-xl sm:rounded-2xl overflow-hidden relative z-0 h-[320px] sm:h-[420px] lg:h-[480px] border border-slate-100">
               <MapContainer
                 center={[30.7333, 76.7794]}
                 zoom={12}
@@ -285,14 +292,31 @@ export default function SafeZones() {
               </MapContainer>
             </div>
 
-            <div className="p-3 flex items-center justify-between text-xs text-slate-500">
-              <span className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-600"></span> Shelter
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-600 ml-2"></span> Hospital
-                <span className="w-2.5 h-2.5 rounded-full bg-amber-600 ml-2"></span> Relief Camp
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-600 ml-2"></span> Food Center
-              </span>
-              <span className="font-semibold text-slate-700">{filteredZones.length} centers available</span>
+            {/* Map Legend & Count Strip */}
+            <div className="p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs text-slate-600 border-t border-slate-100 bg-slate-50/50">
+              <div className="flex flex-wrap items-center gap-x-3.5 gap-y-1.5 text-[11px] sm:text-xs">
+                <span className="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0"></span>
+                  <span>Shelter</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-600 shrink-0"></span>
+                  <span>Hospital</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-600 shrink-0"></span>
+                  <span>Relief Camp</span>
+                </span>
+                <span className="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-600 shrink-0"></span>
+                  <span>Food Center</span>
+                </span>
+              </div>
+              <div className="text-[11px] sm:text-xs font-semibold text-slate-700 whitespace-nowrap self-end sm:self-auto">
+                <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200">
+                  {filteredZones.length} centers available
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -347,12 +371,12 @@ export default function SafeZones() {
 
                   {/* Bed Capacity Progress Bar */}
                   <div className="space-y-1">
-                    <div className="flex justify-between text-[11px] text-slate-600">
-                      <span className="flex items-center gap-1 font-medium">
+                    <div className="flex justify-between items-center text-[11px] text-slate-600 gap-2">
+                      <span className="flex items-center gap-1 font-medium whitespace-nowrap shrink-0">
                         <FaBed className="text-indigo-600" />
                         <span>Occupancy</span>
                       </span>
-                      <span className="font-semibold text-slate-800">
+                      <span className="font-semibold text-slate-800 whitespace-nowrap text-right">
                         {zone.capacity} beds ({100 - capacityPercent}% available)
                       </span>
                     </div>
