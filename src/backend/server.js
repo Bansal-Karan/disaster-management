@@ -10,6 +10,7 @@ import cookieParser from "cookie-parser"
 
 import mongoose from "mongoose";
 import broadcastRoutes from "./routes/broadcastRoutes.js";
+import volunteerRoutes from "./routes/volunteerRoutes.js";
 
 dotenv.config();
 mongoDb();
@@ -34,6 +35,7 @@ app.use("/api/safeZones", safeZoneRoutes);
 app.use("/api/safezones", safeZoneRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/broadcasts", broadcastRoutes);
+app.use("/api/volunteer", volunteerRoutes);
 
 app.get("/", (req, res) => {
   res.status(200).json({ status: "online", message: "AapdaMitra API is running live" });

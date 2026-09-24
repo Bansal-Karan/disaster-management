@@ -46,7 +46,6 @@ export default function AuthPage() {
             name: form.name.trim(),
             username: form.username.trim(),
             password: form.password,
-            role: form.role, // 'user' or 'volunteer'
           }),
         });
 
@@ -180,7 +179,7 @@ export default function AuthPage() {
               </h2>
               <p className="text-xs text-slate-500 mt-1">
                 {isRegister
-                  ? "Register as a Citizen or Field Volunteer."
+                  ? "Register as a Citizen. You can apply to join the volunteer rescue team from your account."
                   : "Sign in with your username or email to continue."}
               </p>
             </div>
@@ -270,20 +269,13 @@ export default function AuthPage() {
                 </div>
               )}
 
-              {/* Role Selection (Citizens and Volunteers only) */}
+              {/* Citizen info notice when registering */}
               {isRegister && (
-                <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Enrollment Role *
-                  </label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value })}
-                    className="glass-input w-full px-3.5 py-2.5 rounded-xl text-sm outline-none bg-white text-slate-900 border border-slate-200 focus:border-indigo-500 cursor-pointer"
-                  >
-                    <option value="user">Citizen / Public User</option>
-                    <option value="volunteer">Field Rescue Volunteer</option>
-                  </select>
+                <div className="p-3 rounded-xl bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-900 flex items-start gap-2">
+                  <FaHandsHelping className="text-indigo-600 text-sm shrink-0 mt-0.5" />
+                  <p className="leading-relaxed">
+                    All accounts start as <b>Citizen</b>. Once registered, you can apply to join the emergency volunteer team and get approved by Admin.
+                  </p>
                 </div>
               )}
 
@@ -299,7 +291,7 @@ export default function AuthPage() {
                     <span>{isRegister ? "Registering..." : "Signing In..."}</span>
                   </>
                 ) : (
-                  <span>{isRegister ? "Complete Registration" : "Sign In to AapdaMitra"}</span>
+                  <span>{isRegister ? "Create Citizen Account" : "Sign In to AapdaMitra"}</span>
                 )}
               </button>
 

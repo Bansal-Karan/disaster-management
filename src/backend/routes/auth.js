@@ -55,8 +55,8 @@ router.post('/register', async (req, res) => {
             });
         }
 
-        // Assigned role is either volunteer or user (default: user)
-        const assignedRole = role === 'volunteer' ? 'volunteer' : 'user';
+        // All registrations are strictly Citizens. Becoming a volunteer requires applying and Admin approval.
+        const assignedRole = 'user';
 
         if (mongoose.connection.readyState !== 1) {
             return res.status(503).json({
@@ -80,7 +80,7 @@ router.post('/register', async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: `${assignedRole === 'volunteer' ? 'Field Volunteer' : 'Citizen'} account registered successfully! You can now sign in.`,
+            message: "Citizen account registered successfully! You can sign in and apply to join the volunteer rescue team anytime.",
             data: { id: newUser._id, name: newUser.name, username: newUser.username, role: newUser.role }
         });
     } catch (error) {
@@ -155,7 +155,7 @@ router.post('/login', async (req, res) => {
                     const secret = getJwtSecret();
                     const userRole = existingUser.role || "user";
                     const token = jwt.sign(
-                        { username: existingUser.username, role: userRole, id: existingUser._id },
+                        { username: existingUser.username, role: userRole, id: existingUser._id, name: existingUser.name },
                         secret,
                         { expiresIn: "7d" }
                     );
@@ -192,9 +192,33 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/check-auth', authMiddleware, async (req, res) => {
-    const user = req.user;
-    if (!user) return res.status(401).json({ success: false, message: "Unauthorized" });
-    res.status(200).json({ success: true, message: "User authenticated", user });
+    try {
+        const user = req.user;
+        if (!user) return res.status(401).json({ success: false, message: "Unauthorized" });
+
+        // If admin system account, return as is
+        if (user.role === 'admin') {
+            return res.status(200).json({ success: true, message: "User authenticated", user });
+        }
+
+        // Fetch fresh role from MongoDB if available
+        if (mongoose.connection.readyState === 1 && user.id && mongoose.Types.ObjectId.isValid(user.id)) {
+            const dbUser = await User.findById(user.id).select("-password");
+            if (dbUser) {
+                const refreshedUser = {
+                    id: dbUser._id,
+                    name: dbUser.name,
+                    username: dbUser.username,
+                    role: dbUser.role || "user",
+                };
+                return res.status(200).json({ success: true, message: "User authenticated", user: refreshedUser });
+            }
+        }
+
+        res.status(200).json({ success: true, message: "User authenticated", user });
+    } catch (err) {
+        res.status(200).json({ success: true, message: "User authenticated", user: req.user });
+    }
 });
 
 export default router

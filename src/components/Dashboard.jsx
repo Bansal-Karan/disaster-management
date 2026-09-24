@@ -18,8 +18,12 @@ import {
   FaSpinner, 
   FaLock,
   FaFilter,
-  FaBed
+  FaBed,
+  FaUserPlus,
+  FaEnvelope,
+  FaTimes
 } from "react-icons/fa";
+import VolunteerApplicationModal from "./VolunteerApplicationModal";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -52,6 +56,15 @@ export default function Dashboard() {
   const [broadcasts, setBroadcasts] = useState([]);
   const [newBroadcast, setNewBroadcast] = useState({ title: "", severity: "WARNING" });
 
+  // Volunteer Management & Mission Assignment State
+  const [volunteerApps, setVolunteerApps] = useState([]);
+  const [volunteersList, setVolunteersList] = useState([]);
+  const [loadingApps, setLoadingApps] = useState(false);
+  const [assignModalIncident, setAssignModalIncident] = useState(null);
+  const [assignedVolunteerInput, setAssignedVolunteerInput] = useState("");
+  const [customVolunteerInput, setCustomVolunteerInput] = useState("");
+  const [showVolunteerApplyModal, setShowVolunteerApplyModal] = useState(false);
+
   const getTimeAgo = (createdAt) => {
     if (!createdAt) return "Recently issued";
     const diffMs = Date.now() - new Date(createdAt).getTime();
@@ -77,8 +90,9 @@ export default function Dashboard() {
     const storedToken = localStorage.getItem("token");
     setToken(storedToken);
 
+    let storedUser = null;
     try {
-      const storedUser = JSON.parse(localStorage.getItem("user"));
+      storedUser = JSON.parse(localStorage.getItem("user"));
       setCurrentUser(storedUser);
     } catch {
       setCurrentUser(null);
@@ -87,6 +101,10 @@ export default function Dashboard() {
     fetchIncidents();
     fetchSafeZones();
     fetchBroadcasts();
+    fetchVolunteersList();
+    if (storedUser?.role === "admin") {
+      fetchVolunteerApps();
+    }
   }, []);
 
   const fetchBroadcasts = async () => {
@@ -351,6 +369,74 @@ export default function Dashboard() {
     }
   };
 
+  // Fetch Volunteer Applications (Admin only)
+  const fetchVolunteerApps = async () => {
+    try {
+      setLoadingApps(true);
+      const res = await fetch(`${API_URL}/api/volunteer/applications`, {
+        headers: getAuthHeaders(),
+      });
+      const json = await res.json();
+      if (res.ok && json.success && Array.isArray(json.data)) {
+        setVolunteerApps(json.data);
+      }
+    } catch (err) {
+      console.warn("Could not fetch volunteer applications:", err);
+    } finally {
+      setLoadingApps(false);
+    }
+  };
+
+  // Fetch Approved Volunteers List (For mission assignment)
+  const fetchVolunteersList = async () => {
+    try {
+      const res = await fetch(`${API_URL}/api/volunteer/list`, {
+        headers: getAuthHeaders(),
+      });
+      const json = await res.json();
+      if (res.ok && json.success && Array.isArray(json.data)) {
+        setVolunteersList(json.data);
+      }
+    } catch (err) {
+      console.warn("Could not fetch volunteers list:", err);
+    }
+  };
+
+  // Review Application (Admin approves/rejects)
+  const handleReviewApplication = async (appId, status, adminNotes = "") => {
+    try {
+      const res = await fetch(`${API_URL}/api/volunteer/applications/${appId}/review`, {
+        method: "PATCH",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status, adminNotes }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        toast.success(json.message || `Application ${status}!`);
+        setVolunteerApps((prev) =>
+          prev.map((a) => (a._id === appId ? { ...a, status, reviewedAt: new Date() } : a))
+        );
+        fetchVolunteersList();
+      } else {
+        toast.error(json.message || "Failed to update application.");
+      }
+    } catch {
+      toast.error("Network error reviewing application.");
+    }
+  };
+
+  // Handle Assign Volunteer submission
+  const handleAssignVolunteerSubmit = (e) => {
+    e.preventDefault();
+    if (!assignModalIncident) return;
+    const finalVolunteer = customVolunteerInput.trim() || assignedVolunteerInput.trim() || "Field Volunteer";
+    handleUpdateStatus(assignModalIncident._id, "In Progress", finalVolunteer);
+    toast.success(`Mission assigned to: ${finalVolunteer}`);
+    setAssignModalIncident(null);
+    setCustomVolunteerInput("");
+    setAssignedVolunteerInput("");
+  };
+
   // Post Broadcast (persisted to MongoDB with 24h TTL)
   const handlePostBroadcast = async (e) => {
     e.preventDefault();
@@ -423,13 +509,9 @@ export default function Dashboard() {
       ? incidents
       : incidents.filter((i) => i.status === incidentFilter);
 
-  // Self-upgrade to volunteer for demonstration / field joining
+  // Open Volunteer Application Modal for citizens
   const handleUpgradeToVolunteer = () => {
-    const updated = { ...(currentUser || {}), role: "volunteer" };
-    setCurrentUser(updated);
-    localStorage.setItem("user", JSON.stringify(updated));
-    setActiveRoleOverride("volunteer");
-    toast.success("Welcome to the Field Responder unit! Volunteer portal unlocked.");
+    setShowVolunteerApplyModal(true);
   };
 
   // If user is not logged in, show clear sign-in gateway
@@ -483,10 +565,10 @@ export default function Dashboard() {
 
           <button
             onClick={handleUpgradeToVolunteer}
-            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-100 transition-all hover:scale-105"
+            className="flex items-center gap-2 px-5 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-100 transition-all hover:scale-105 cursor-pointer"
           >
             <FaHandsHelping className="text-base" />
-            <span>Enroll as Field Volunteer</span>
+            <span>Apply to Join Volunteer Force</span>
           </button>
         </div>
 
@@ -586,6 +668,30 @@ export default function Dashboard() {
             </p>
           </NavLink>
         </div>
+
+        {/* Volunteer Application Modal for Citizens */}
+        <VolunteerApplicationModal
+          isOpen={showVolunteerApplyModal}
+          onClose={() => setShowVolunteerApplyModal(false)}
+          onStatusUpdated={async () => {
+            fetchVolunteersList();
+            try {
+              const tk = localStorage.getItem("token");
+              if (tk) {
+                const res = await fetch(`${API_URL}/api/user/check-auth`, {
+                  headers: { Authorization: `Bearer ${tk}` },
+                });
+                const data = await res.json();
+                if (res.ok && data.success && data.user) {
+                  localStorage.setItem("user", JSON.stringify(data.user));
+                  setCurrentUser(data.user);
+                }
+              }
+            } catch (e) {
+              console.warn("Could not refresh user auth:", e);
+            }
+          }}
+        />
       </div>
     );
   }
@@ -711,6 +817,15 @@ export default function Dashboard() {
       <div className="w-full flex overflow-x-auto no-scrollbar gap-2 border-b border-slate-200 pb-3 pt-1">
         {[
           { id: "incidents", label: "🚨 Incident Feed", count: incidents.length },
+          ...(isAdmin
+            ? [
+                {
+                  id: "volunteers",
+                  label: "🤝 Volunteer Requests",
+                  count: volunteerApps.filter((a) => a.status === "Pending").length,
+                },
+              ]
+            : []),
           { id: "shelters", label: "🏥 Safe Shelters", count: safeZones.length || 5 },
           { id: "broadcast", label: "📢 Bulletins", count: broadcasts.length },
           { id: "roster", label: "🛡️ Protocols", count: null },
@@ -852,10 +967,26 @@ export default function Dashboard() {
 
                       {/* Right: Operational Action Buttons */}
                       <div className="flex flex-col sm:flex-row lg:flex-col gap-2 w-full lg:w-48 shrink-0">
-                        {isPending && (
+                        {/* Assign to Volunteer Button (Admin Only) */}
+                        {isAdmin && isPending && (
                           <button
-                            onClick={() => handleUpdateStatus(incident._id, "In Progress")}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition-all"
+                            onClick={() => {
+                              setAssignModalIncident(incident);
+                              setAssignedVolunteerInput(volunteersList[0]?.name || "");
+                              setCustomVolunteerInput("");
+                            }}
+                            className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs transition-all font-semibold cursor-pointer"
+                          >
+                            <FaUserCheck className="text-xs" />
+                            <span>{incident.assignedTo ? "Reassign Volunteer" : "Assign to Volunteer"}</span>
+                          </button>
+                        )}
+
+                        {/* Claim Mission Button (Volunteer Only) */}
+                        {isPending && isVolunteer && (
+                          <button
+                            onClick={() => handleUpdateStatus(incident._id, "In Progress", currentUser?.name)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs shadow-sm transition-all cursor-pointer"
                           >
                             <FaHandsHelping />
                             <span>Claim Mission</span>
@@ -1128,6 +1259,214 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* 5. Tab: Volunteer Requests & Force Management (Admin only) */}
+      {isAdmin && activeTab === "volunteers" && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 font-['Outfit']">
+                Volunteer Enrollment & Force Management
+              </h2>
+              <p className="text-xs text-slate-600">
+                Review citizen applications, verify rescue qualifications, and authorize Field Volunteer access.
+              </p>
+            </div>
+
+            <button
+              onClick={fetchVolunteerApps}
+              className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold border border-slate-200 cursor-pointer"
+            >
+              ↻ Refresh Applications
+            </button>
+          </div>
+
+          {/* Quick Metrics */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+              <span className="text-xs text-slate-500">Pending Review</span>
+              <div className="text-2xl font-bold text-amber-600 font-['Outfit']">
+                {volunteerApps.filter((a) => a.status === "Pending").length}
+              </div>
+              <p className="text-[11px] text-slate-500">Citizens waiting for authorization</p>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+              <span className="text-xs text-slate-500">Active Volunteer Responders</span>
+              <div className="text-2xl font-bold text-emerald-600 font-['Outfit']">
+                {volunteersList.length}
+              </div>
+              <p className="text-[11px] text-slate-500">Authorized to claim missions</p>
+            </div>
+
+            <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-1">
+              <span className="text-xs text-slate-500">Total Enrolled History</span>
+              <div className="text-2xl font-bold text-slate-900 font-['Outfit']">
+                {volunteerApps.length}
+              </div>
+              <p className="text-[11px] text-slate-500">Historical enrollment requests</p>
+            </div>
+          </div>
+
+          {/* Section 1: Pending Volunteer Applications */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+              <span>Pending Applications ({volunteerApps.filter((a) => a.status === "Pending").length})</span>
+            </h3>
+
+            {loadingApps ? (
+              <div className="p-10 text-center text-slate-500 space-y-2">
+                <FaSpinner className="animate-spin text-2xl mx-auto text-indigo-600" />
+                <p className="text-xs">Loading volunteer applications...</p>
+              </div>
+            ) : volunteerApps.filter((a) => a.status === "Pending").length === 0 ? (
+              <div className="bg-white p-8 text-center rounded-2xl border border-slate-200 shadow-xs space-y-2">
+                <FaCheckCircle className="text-emerald-600 text-3xl mx-auto" />
+                <p className="text-sm font-bold text-slate-900">All Applications Processed</p>
+                <p className="text-xs text-slate-500">No pending citizen applications at this time.</p>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {volunteerApps
+                  .filter((a) => a.status === "Pending")
+                  .map((app) => (
+                    <div
+                      key={app._id}
+                      className="bg-white p-5 sm:p-6 rounded-2xl border border-amber-200 bg-amber-50/15 shadow-xs space-y-4"
+                    >
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-base font-bold text-slate-900 font-['Outfit']">{app.name}</h4>
+                            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                              Pending Review
+                            </span>
+                          </div>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {app.username} • Applied {getTimeAgo(app.createdAt)}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleReviewApplication(app._id, "Approved")}
+                            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <FaCheckCircle className="text-xs" />
+                            <span>Approve as Volunteer</span>
+                          </button>
+                          <button
+                            onClick={() =>
+                              handleReviewApplication(
+                                app._id,
+                                "Rejected",
+                                "Qualifications did not match current relief operational needs."
+                              )
+                            }
+                            className="px-3.5 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-all cursor-pointer"
+                          >
+                            Decline
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid sm:grid-cols-3 gap-3 text-xs">
+                        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                          <FaPhoneAlt className="text-indigo-600 shrink-0" />
+                          <span className="font-semibold text-slate-800">{app.phone}</span>
+                        </div>
+                        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                          <FaMapMarkerAlt className="text-rose-600 shrink-0" />
+                          <span className="font-semibold text-slate-800">{app.location}</span>
+                        </div>
+                        <div className="flex items-center gap-2 p-2.5 rounded-xl bg-slate-50 border border-slate-100">
+                          <FaClock className="text-amber-600 shrink-0" />
+                          <span className="font-semibold text-slate-800">{app.availability}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                          Applicable Skills:
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {app.skills?.map((s) => (
+                            <span
+                              key={s}
+                              className="px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-medium"
+                            >
+                              ✓ {s}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed">
+                        <span className="font-bold text-slate-900 block mb-1">Experience / Statement:</span>
+                        {app.experience}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Active Enrolled Volunteer Roster */}
+          <div className="space-y-4 pt-4">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+              <FaUserCheck className="text-emerald-600" />
+              <span>Active Volunteer Force Roster ({volunteersList.length})</span>
+            </h3>
+
+            {volunteersList.length === 0 ? (
+              <div className="bg-white p-8 text-center rounded-2xl border border-slate-200 shadow-xs text-xs text-slate-500">
+                No field volunteers currently registered. Approved applicants will appear in this roster.
+              </div>
+            ) : (
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {volunteersList.map((vol) => (
+                  <div key={vol._id} className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active Responder
+                      </span>
+                      <span className="text-[11px] text-slate-400 font-mono">ID: {String(vol._id).slice(-4)}</span>
+                    </div>
+
+                    <div>
+                      <h4 className="text-base font-bold text-slate-900 font-['Outfit']">{vol.name}</h4>
+                      <p className="text-xs text-slate-500">{vol.username}</p>
+                    </div>
+
+                    <div className="text-xs text-slate-600 space-y-1">
+                      <p className="flex items-center gap-1.5 font-medium">
+                        <FaPhoneAlt className="text-indigo-600 text-[10px]" />
+                        <span>{vol.phone}</span>
+                      </p>
+                      <p className="flex items-center gap-1.5 text-slate-500">
+                        <FaMapMarkerAlt className="text-rose-500 text-[10px]" />
+                        <span>{vol.location}</span>
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 pt-2 border-t border-slate-100">
+                      {vol.skills?.slice(0, 3).map((s) => (
+                        <span
+                          key={s}
+                          className="px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200 text-[10px] text-slate-600 font-medium"
+                        >
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* 7. Tab 4: Responder Guidelines */}
       {activeTab === "roster" && (
         <div className="glass-panel p-6 sm:p-10 rounded-3xl border border-slate-200 shadow-md space-y-6 text-left animate-in fade-in duration-200 bg-white">
@@ -1281,6 +1620,125 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* 9. Modal: Assign Volunteer to Incident (Admin only) */}
+      {assignModalIncident && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 border border-slate-200 shadow-2xl space-y-5 text-left">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <FaUserCheck />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 font-['Outfit']">
+                  Assign Mission to Volunteer
+                </h3>
+              </div>
+              <button
+                onClick={() => setAssignModalIncident(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Target incident snippet */}
+            <div className="p-3.5 rounded-2xl bg-rose-50/40 border border-rose-200 text-xs space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="font-bold text-slate-900 text-sm">{assignModalIncident.name}</span>
+                <span className="text-rose-700 font-bold">{assignModalIncident.phone}</span>
+              </div>
+              <p className="text-slate-600 font-medium flex items-center gap-1">
+                <FaMapMarkerAlt className="text-rose-500" />
+                <span>{assignModalIncident.location}</span>
+              </p>
+              <p className="text-slate-700 italic line-clamp-2">
+                "{assignModalIncident.message}"
+              </p>
+            </div>
+
+            <form onSubmit={handleAssignVolunteerSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
+                  Select Registered Field Volunteer
+                </label>
+                <select
+                  value={assignedVolunteerInput}
+                  onChange={(e) => {
+                    setAssignedVolunteerInput(e.target.value);
+                    if (e.target.value) setCustomVolunteerInput("");
+                  }}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:border-indigo-500 outline-none bg-white text-slate-800"
+                >
+                  <option value="">-- Choose from Enrolled Responders --</option>
+                  {volunteersList.map((vol) => (
+                    <option key={vol._id} value={vol.name}>
+                      {vol.name} ({vol.skills?.slice(0, 2).join(", ") || "General Relief"}) - {vol.location}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Or Specify Custom Unit / Battalion
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. NDRF Quick Response Team 4 or SDRF Unit"
+                  value={customVolunteerInput}
+                  onChange={(e) => {
+                    setCustomVolunteerInput(e.target.value);
+                    if (e.target.value) setAssignedVolunteerInput("");
+                  }}
+                  className="w-full p-2.5 rounded-xl border border-slate-200 text-xs focus:border-indigo-500 outline-none"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setAssignModalIncident(null)}
+                  className="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs shadow-md shadow-indigo-100 transition-all cursor-pointer"
+                >
+                  Dispatch & Assign
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 10. Volunteer Application Modal (For Citizen View) */}
+      <VolunteerApplicationModal
+        isOpen={showVolunteerApplyModal}
+        onClose={() => setShowVolunteerApplyModal(false)}
+        onStatusUpdated={async () => {
+          fetchVolunteersList();
+          if (isAdmin) fetchVolunteerApps();
+          try {
+            const tk = localStorage.getItem("token");
+            if (tk) {
+              const res = await fetch(`${API_URL}/api/user/check-auth`, {
+                headers: { Authorization: `Bearer ${tk}` },
+              });
+              const data = await res.json();
+              if (res.ok && data.success && data.user) {
+                localStorage.setItem("user", JSON.stringify(data.user));
+                setCurrentUser(data.user);
+              }
+            }
+          } catch (e) {
+            console.warn("Could not refresh user auth:", e);
+          }
+        }}
+      />
 
     </div>
   );

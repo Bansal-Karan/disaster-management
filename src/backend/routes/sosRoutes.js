@@ -13,7 +13,7 @@ router.post("/", authMiddleware, async (req, res) => {
     const { name, email, phone, location, message } = req.body;
 
     try {
-        // Always record emergency in MongoDB first
+        // 1. Always record emergency in MongoDB first
         const newSOS = await SOS.create({
             name,
             email,
@@ -23,40 +23,46 @@ router.post("/", authMiddleware, async (req, res) => {
             status: "Pending",
         });
 
-        // Attempt sending email alert asynchronously
-        try {
-            if (process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.RECEIVER_EMAIL) {
-                const transporter = nodemailer.createTransport({
-                    service: "gmail",
-                    auth: {
-                        user: process.env.EMAIL_USER,
-                        pass: process.env.EMAIL_PASS,
-                    },
-                });
-
-                await transporter.sendMail({
-                    from: `"AapdaMitra SOS Alert" <${process.env.EMAIL_USER}>`,
-                    to: process.env.RECEIVER_EMAIL,
-                    subject: "🚨 [AapdaMitra] New SOS Request Received",
-                    html: `
-                        <h2>New SOS Request</h2>
-                        <p><b>Name:</b> ${name}</p>
-                        <p><b>Phone:</b> ${phone}</p>
-                        <p><b>Location:</b> ${location}</p>
-                        <p><b>Message:</b> ${message}</p>
-                        <p><b>Incident ID:</b> ${newSOS._id}</p>
-                    `,
-                });
-            }
-        } catch (mailErr) {
-            console.warn("Mail notification warning (SOS still recorded):", mailErr.message);
-        }
-
+        // 2. Respond immediately to the client so UI does not hang or wait
         res.status(201).json({ 
             success: true, 
             message: "SOS request recorded and dispatched successfully!", 
             data: newSOS 
         });
+
+        // 3. Attempt email notification in background (non-blocking, fire-and-forget)
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.RECEIVER_EMAIL) {
+            setImmediate(async () => {
+                try {
+                    const transporter = nodemailer.createTransport({
+                        service: "gmail",
+                        auth: {
+                            user: process.env.EMAIL_USER,
+                            pass: process.env.EMAIL_PASS,
+                        },
+                        connectionTimeout: 4000,
+                        greetingTimeout: 4000,
+                        socketTimeout: 5000,
+                    });
+
+                    await transporter.sendMail({
+                        from: `"AapdaMitra SOS Alert" <${process.env.EMAIL_USER}>`,
+                        to: process.env.RECEIVER_EMAIL,
+                        subject: "🚨 [AapdaMitra] New SOS Request Received",
+                        html: `
+                            <h2>New SOS Request</h2>
+                            <p><b>Name:</b> ${name}</p>
+                            <p><b>Phone:</b> ${phone}</p>
+                            <p><b>Location:</b> ${location}</p>
+                            <p><b>Message:</b> ${message}</p>
+                            <p><b>Incident ID:</b> ${newSOS._id}</p>
+                        `,
+                    });
+                } catch (mailErr) {
+                    console.warn("Background mail notification warning (SOS already saved):", mailErr.message);
+                }
+            });
+        }
     } catch (err) {
         console.error("Error saving SOS:", err);
         res.status(500).json({ success: false, error: "Failed to record SOS request" });

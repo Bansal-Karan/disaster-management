@@ -82,6 +82,9 @@ export default function SOSRequest() {
       message: `[Severity: ${form.urgency}] [Category: ${form.category}] - ${form.message}`,
     };
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s maximum timeout
+
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${API_URL}/api/sos`, {
@@ -91,25 +94,34 @@ export default function SOSRequest() {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+
+      if (res.status === 401) {
+        toast.error("Authentication expired. Please log in again to broadcast an SOS.");
+        return;
+      }
+
+      const dispatchId = data.data?._id 
+        ? "SOS-" + String(data.data._id).slice(-6).toUpperCase()
+        : "DISPATCH-" + Math.floor(100000 + Math.random() * 900000);
+
       if (res.ok && data.success) {
-        toast.success("SOS Alert dispatched to emergency teams!");
-        setSubmittedDispatch({
-          id: "DISPATCH-" + Math.floor(100000 + Math.random() * 900000),
-          ...form,
-          timestamp: new Date().toLocaleTimeString(),
-        });
+        toast.success("🚨 SOS Alert dispatched to emergency teams!");
       } else {
         toast.success("Emergency request recorded in dispatch log!");
-        setSubmittedDispatch({
-          id: "DISPATCH-" + Math.floor(100000 + Math.random() * 900000),
-          ...form,
-          timestamp: new Date().toLocaleTimeString(),
-        });
       }
+
+      setSubmittedDispatch({
+        id: dispatchId,
+        ...form,
+        timestamp: new Date().toLocaleTimeString(),
+      });
     } catch (err) {
+      clearTimeout(timeoutId);
       toast.success("Emergency distress signal broadcasted locally!");
       setSubmittedDispatch({
         id: "EMERGENCY-" + Math.floor(100000 + Math.random() * 900000),
